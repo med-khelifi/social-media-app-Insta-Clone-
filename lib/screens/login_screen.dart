@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       CustomTextField(label: "Username"),
                       VerticalSpace(10.h),
-                      CustomTextField(label: "Email"),
+                      CustomTextField(label: "Password",isPassword: true,),
                     ],
                   ),
                 ),

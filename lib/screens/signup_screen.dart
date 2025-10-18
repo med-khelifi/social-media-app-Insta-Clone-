@@ -53,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       VerticalSpace(10.h),
                       CustomTextField(label: "Email"),
                       VerticalSpace(10.h),
-                      CustomTextField(label: "Password"),
+                      CustomTextField(label: "Password",isPassword: true,),
                     ],
                   ),
                 ),

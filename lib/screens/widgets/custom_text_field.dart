@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
-  const CustomTextField({super.key, required this.label, this.hint});
+  const CustomTextField({
+    super.key,
+    required this.label,
+    this.hint,
+    this.isPassword = false,
+    this.onSuffixIconPressed,
+  });
   final String label;
   final String? hint;
+  final VoidCallback? onSuffixIconPressed;
+  final bool? isPassword;
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      obscureText: isPassword ?? false,
       decoration: InputDecoration(
+        suffixIcon: isPassword ?? false
+            ? IconButton(
+                onPressed: isPassword ?? false ? onSuffixIconPressed : null,
+                icon: Icon(Icons.visibility_off),
+              )
+            : null,
         label: Text(label),
         hintText: hint ?? "",
         border: OutlineInputBorder(
