@@ -11,7 +11,7 @@ class Insta extends StatelessWidget {
       designSize: const Size(392.72, 807.27),
       child: MaterialApp(
         routes: Routes.routes,
-        initialRoute: RoutesNames.signup,
+        initialRoute: RoutesNames.home,
         theme: ThemeData.dark(),
       ),
     );

@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/controllers/login_screen_controller.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
+import 'package:insta/core/constants/strings.dart';
+import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/custom_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,17 +15,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late LoginScreenController controller;
+  late LoginScreenController _controller;
   @override
   void initState() {
     super.initState();
-    controller = LoginScreenController();
+    _controller = LoginScreenController();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
@@ -32,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Insta App',
+                  Strings.instaApp,
                   style: TextStyle(
                     fontSize: 32.sp,
                     fontWeight: FontWeight.bold,
@@ -40,25 +43,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 VerticalSpace(10.h),
                 Form(
+                  key: _controller.formKey,
                   child: Column(
                     children: [
-                      CustomTextField(label: "Username"),
+                      CustomTextField(
+                        label: Strings.username,
+                        validator: _controller.validateUsername,
+                      ),
                       VerticalSpace(10.h),
-                      CustomTextField(label: "Password",isPassword: true,),
+                      CustomTextField(
+                        label: Strings.password,
+                        validator: _controller.validatePassword,
+                        isPassword: true,
+                      ),
                     ],
                   ),
                 ),
                 VerticalSpace(10.h),
-                MaterialButton(
-                  minWidth: double.infinity,
-                  color: ColorsManager.blue,
-                  onPressed: () {},
-                  child: Text('login'),
+                CustomButton(
+                  text: Strings.login,
+                  onPressed: () => _controller.login(context),
                 ),
                 TextButton(
-                  onPressed: () => controller.goToSignupScreen(context),
+                  onPressed: () => _controller.goToSignupScreen(context),
                   child: Text(
-                    "create a new account",
+                    Strings.dontHaveAcc,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,

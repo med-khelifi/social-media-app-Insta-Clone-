@@ -4,6 +4,8 @@ import 'package:insta/controllers/signup_screen.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
+import 'package:insta/core/constants/strings.dart';
+import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/custom_text_field.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
@@ -33,7 +36,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Insta App',
+                  Strings.instaApp,
                   style: TextStyle(
                     fontSize: 32.sp,
                     fontWeight: FontWeight.bold,
@@ -47,27 +50,29 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 VerticalSpace(10.h),
                 Form(
+                  key: _controller.formKey,
                   child: Column(
                     children: [
-                      CustomTextField(label: "Username"),
+                      CustomTextField(label: Strings.username),
                       VerticalSpace(10.h),
-                      CustomTextField(label: "Email"),
+                      CustomTextField(label: Strings.email),
                       VerticalSpace(10.h),
-                      CustomTextField(label: "Password",isPassword: true,),
+                      CustomTextField(
+                        label: Strings.password,
+                        isPassword: true,
+                      ),
                     ],
                   ),
                 ),
                 VerticalSpace(10.h),
-                MaterialButton(
-                  minWidth: double.infinity,
-                  color: ColorsManager.blue,
-                  onPressed: () {},
-                  child: Text('Sign Up'),
+                CustomButton(
+                  text: Strings.signup,
+                  onPressed: () => _controller.signup(context),
                 ),
                 TextButton(
                   onPressed: () => _controller.goToLoginScreen(context),
                   child: Text(
-                    "Already have an account? Login",
+                    Strings.alreadyHaveAcc,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
