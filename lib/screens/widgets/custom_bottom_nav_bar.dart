@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:insta/core/constants/colors.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
-  const CustomBottomNavBar({super.key});
-
+  const CustomBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onIndexChanged,
+  });
+  final int currentIndex;
+  final ValueChanged<int> onIndexChanged;
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      showUnselectedLabels: false,
-      showSelectedLabels: true,
-      selectedLabelStyle: const TextStyle(color: ColorsManager.white),
+      currentIndex: currentIndex,
+      onTap: onIndexChanged,
+      selectedItemColor: ColorsManager.white,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home, color: ColorsManager.white),
