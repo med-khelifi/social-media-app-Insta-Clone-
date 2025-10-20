@@ -16,4 +16,8 @@ class Strings {
       'Password must be at least 6 characters long';
   static const String addNewPost = 'Add New Post';
   static const String writeCaption = 'Write a caption...';
+  static const String posts = 'Posts';
+  static const String followers = 'Followers';
+  static const String following = 'following';
+  static const String editProfile = "Edit Profile";
 }

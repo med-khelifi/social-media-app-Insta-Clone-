@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:insta/core/constants/colors.dart';
 
 class StatsInfo extends StatelessWidget {
-  const StatsInfo( {super.key, required this.number, required this.label});
+  const StatsInfo({super.key, required this.number, required this.label});
   final String number;
   final String label;
   @override
@@ -15,10 +16,9 @@ class StatsInfo extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 14.sp, color: ColorsManager.grey),
         ),
       ],
     );
   }
-  
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
+import 'package:insta/core/constants/strings.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/stats_info.dart';
 
@@ -53,9 +53,9 @@ class ProfileTab extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          StatsInfo(number: "100", label: "Posts"),
-                          StatsInfo(number: "200", label: "Followers"),
-                          StatsInfo(number: "120", label: "Following"),
+                          StatsInfo(number: "100", label: Strings.posts),
+                          StatsInfo(number: "200", label: Strings.followers),
+                          StatsInfo(number: "120", label: Strings.following),
                         ],
                       ),
                     ],
@@ -70,9 +70,9 @@ class ProfileTab extends StatelessWidget {
             style: TextStyle(fontSize: 14.sp),
           ),
           CustomButton(
-            text: "Edit Profile",
+            text: Strings.editProfile,
             onPressed: () {},
-            color: ColorsManager.grey,
+            color: const Color.fromARGB(255, 186, 180, 180),
           ),
         ],
       ),
