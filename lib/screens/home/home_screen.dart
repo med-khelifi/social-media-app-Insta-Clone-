@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:insta/core/tabs/home_screen_tabs.dart';
-import 'package:insta/screens/widgets/custom_bottom_nav_bar.dart';
+import 'package:insta/screens/home/widgets/custom_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
       ),
-      body: HomeScreenTabs.homeScreenTabs[_currentIndex],
+      body: SafeArea(child: HomeScreenTabs.homeScreenTabs[_currentIndex]),
     );
   }
 }

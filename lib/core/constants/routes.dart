@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:insta/screens/home_screen.dart';
+import 'package:insta/screens/home/home_screen.dart';
 import 'package:insta/screens/login_screen.dart';
 import 'package:insta/screens/signup_screen.dart';
 
