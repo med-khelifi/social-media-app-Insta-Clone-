@@ -5,11 +5,15 @@ class Strings {
   static const String login = 'Login';
   static const String signup = 'Sign Up';
   static const String email = 'Email';
+  static const String next = 'Next';
   static const String dontHaveAcc = "Don't have an account? Sign Up";
   static const String alreadyHaveAcc = "Already have an account? Login";
   static const String pleaseEnterUsername = 'Please enter your username';
   static const String pleaseEnterPassword = 'Please enter your password';
   static const String pleaseEnterEmail = "please enter email";
   static const String pleaseEnterValidEmail = "please enter a valid email";
-  static const String passwordMustBeAbove6 = 'Password must be at least 6 characters long';
+  static const String passwordMustBeAbove6 =
+      'Password must be at least 6 characters long';
+  static const String addNewPost = 'Add New Post';
+  static const String writeCaption = 'Write a caption...';
 }
