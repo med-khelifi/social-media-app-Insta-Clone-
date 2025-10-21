@@ -4,8 +4,8 @@ import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
 
 class PostWidget extends StatelessWidget {
-  const PostWidget({super.key});
-
+  const PostWidget({super.key, required this.onCommentIconPressed});
+   final VoidCallback onCommentIconPressed;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -35,7 +35,7 @@ class PostWidget extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.comment_outlined),
-              onPressed: () {},
+              onPressed: onCommentIconPressed,
             ),
             IconButton(icon: const Icon(Icons.send), onPressed: () {}),
             const Spacer(),

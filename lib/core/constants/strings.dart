@@ -20,4 +20,5 @@ class Strings {
   static const String followers = 'Followers';
   static const String following = 'following';
   static const String editProfile = "Edit Profile";
+  static const String comments ="Comments";
 }

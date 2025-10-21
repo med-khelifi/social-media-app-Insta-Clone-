@@ -72,7 +72,22 @@ class ProfileTab extends StatelessWidget {
           CustomButton(
             text: Strings.editProfile,
             onPressed: () {},
-            color: const Color.fromARGB(255, 186, 180, 180),
+            color: Colors.grey,
+          ),
+          Divider(thickness: 1.h),
+          Expanded(
+            child: GridView.builder(
+              itemCount: 10,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 2.w,
+                mainAxisSpacing: 2.h,
+                childAspectRatio: 4 / 5,
+              ),
+              itemBuilder: (context, index) {
+                return Image.asset(ImagesPaths.placeholder, fit: BoxFit.cover);
+              },
+            ),
           ),
         ],
       ),
