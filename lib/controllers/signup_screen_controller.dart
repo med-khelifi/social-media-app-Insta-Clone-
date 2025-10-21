@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
@@ -8,7 +9,7 @@ class SignupScreenController {
   late TextEditingController passwordController;
   late TextEditingController emailController;
 
-  SignupScreenController(){
+  SignupScreenController() {
     init();
   }
   void dispose() {
@@ -59,7 +60,23 @@ class SignupScreenController {
 
   void signup(BuildContext context) {
     if (formKey.currentState!.validate()) {
-      // Perform signup logic here
+      var email = emailController.text.trim();
+      var password = passwordController.text.trim();
+      print(  " ------------------------------------------------------------- email : "  + email  );
+      print(  " ------------------------------------------------------------- password : "  + password  );
+      FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .then((UserCredential userCredential) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(Strings.signupSuccessful)));
+          })
+          .onError((error, stackTrace) {
+            print( " ------------------------------------------------------------- error : "  + error.toString()  );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(error.toString())));
+          });
     }
   }
 }

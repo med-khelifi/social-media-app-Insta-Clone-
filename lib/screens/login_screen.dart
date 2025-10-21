@@ -47,11 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       CustomTextField(
+                        controller: _controller.usernameController,
                         label: Strings.username,
                         validator: _controller.validateUsername,
                       ),
                       VerticalSpace(10.h),
                       CustomTextField(
+                        controller: _controller.passwordController,
                         label: Strings.password,
                         validator: _controller.validatePassword,
                         isPassword: true,

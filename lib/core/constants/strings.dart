@@ -21,4 +21,6 @@ class Strings {
   static const String following = 'following';
   static const String editProfile = "Edit Profile";
   static const String comments ="Comments";
+
+  static String signupSuccessful = "Account Created Successfully !";
 }

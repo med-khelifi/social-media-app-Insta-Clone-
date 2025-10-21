@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
@@ -45,7 +46,21 @@ class LoginScreenController {
 
   void login(BuildContext context) {
     if (formKey.currentState!.validate()) {
-      // Perform login logic here
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: usernameController.text.trim(),
+            password: passwordController.text.trim(),
+          )
+          .then((UserCredential userCredential) {
+            // ignore: use_build_context_synchronously
+            Navigator.pushReplacementNamed(context, RoutesNames.home);
+          })
+          .onError((error, stackTrace) {
+            ScaffoldMessenger.of(
+              // ignore: use_build_context_synchronously
+              context,
+            ).showSnackBar(SnackBar(content: Text(error.toString())));
+          });
     }
   }
 }

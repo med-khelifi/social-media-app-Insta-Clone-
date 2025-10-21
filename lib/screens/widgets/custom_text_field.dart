@@ -6,17 +6,21 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.hint,
     this.isPassword = false,
-    this.onSuffixIconPressed, this.validator,
+    this.onSuffixIconPressed,
+    this.validator,
+    this.controller,
   });
   final String label;
   final String? hint;
   final VoidCallback? onSuffixIconPressed;
   final bool? isPassword;
-  final String? Function(String?)? validator ;
+  final String? Function(String?)? validator;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: controller,
       validator: validator,
       obscureText: isPassword ?? false,
       decoration: InputDecoration(

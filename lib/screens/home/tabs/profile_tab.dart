@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:insta/controllers/profile_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
 import 'package:insta/core/constants/strings.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/stats_info.dart';
 
-class ProfileTab extends StatelessWidget {
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
+
+  @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+late ProfileTabController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = ProfileTabController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +29,18 @@ class ProfileTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "username",
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Text(
+          "username",
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              IconButton(
+          icon: Icon(Icons.logout, size: 24.sp),
+          onPressed: () => _controller.onSignOutPressed(context),
+              ),
+            ],
           ),
           VerticalSpace(10.h),
 
