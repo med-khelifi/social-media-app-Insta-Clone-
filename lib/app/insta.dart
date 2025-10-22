@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/provider/auth_provider.dart';
+import 'package:insta/core/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class Insta extends StatelessWidget {
@@ -14,9 +15,8 @@ class Insta extends StatelessWidget {
       designSize: const Size(392.72, 807.27),
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(
-            create: (_) => AuthProviderState(),
-          ),
+          ChangeNotifierProvider(create: (_) => AuthProviderState()),
+          ChangeNotifierProvider(create: (_) => UserProvider()),
         ],
         child: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),

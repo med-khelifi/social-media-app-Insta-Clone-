@@ -4,8 +4,10 @@ import 'package:insta/controllers/profile_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/provider/user_provider.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/stats_info.dart';
+import 'package:provider/provider.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -16,14 +18,29 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   late ProfileTabController _controller;
+
   @override
   void initState() {
     super.initState();
     _controller = ProfileTabController();
+
+    // تحميل بيانات المستخدم بعد بناء الواجهة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).getUserData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // إذا البيانات مازالت تتحمل
+    if (userProvider.getUser == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final user = userProvider.getUser!;
+
     return Padding(
       padding: EdgeInsets.all(10.w),
       child: Column(
@@ -32,7 +49,7 @@ class _ProfileTabState extends State<ProfileTab> {
           Row(
             children: [
               Text(
-                "username",
+                user.username ?? "Profile",
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -50,28 +67,28 @@ class _ProfileTabState extends State<ProfileTab> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                /// Profile Image
                 CircleAvatar(
                   radius: 45.r,
-                  backgroundImage: AssetImage(ImagesPaths.placeholder),
+                  backgroundImage: (user.profileImageUrl == null ||
+                          user.profileImageUrl!.isEmpty)
+                      ? AssetImage(ImagesPaths.placeholder)
+                          as ImageProvider
+                      : NetworkImage(user.profileImageUrl!),
                 ),
                 HorizontalSpace(16.w),
 
-                /// Name and Stats
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "Mohamed Ahmed",
+                        user.name ?? "????",
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       VerticalSpace(12.h),
-
-                      /// Stats Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -88,7 +105,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
           VerticalSpace(6.h),
           Text(
-            "This is the bio section where the user can write something about themselves.",
+            user.bio ?? "This is my bio",
             style: TextStyle(fontSize: 14.sp),
           ),
           CustomButton(

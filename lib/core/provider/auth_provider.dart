@@ -17,7 +17,7 @@ class AuthProviderState extends ChangeNotifier {
 
   late final SignupScreenController signupController;
   late final LoginScreenController loginController;
-  
+
   AuthProviderState() {
     loginController = LoginScreenController();
     signupController = SignupScreenController();
@@ -83,6 +83,7 @@ class AuthProviderState extends ChangeNotifier {
       final userData = UserModel(
         uid: uid,
         username: username,
+        name: username,
         email: email,
         bio: '',
         profileImageUrl: '',
