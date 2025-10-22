@@ -15,7 +15,7 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
-late ProfileTabController _controller;
+  late ProfileTabController _controller;
   @override
   void initState() {
     super.initState();
@@ -32,13 +32,13 @@ late ProfileTabController _controller;
           Row(
             children: [
               Text(
-          "username",
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                "username",
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               IconButton(
-          icon: Icon(Icons.logout, size: 24.sp),
-          onPressed: () => _controller.onSignOutPressed(context),
+                icon: Icon(Icons.logout, size: 24.sp),
+                onPressed: () => _controller.onSignOutPressed(context),
               ),
             ],
           ),
@@ -92,9 +92,9 @@ late ProfileTabController _controller;
             style: TextStyle(fontSize: 14.sp),
           ),
           CustomButton(
-            text: Strings.editProfile,
             onPressed: () {},
             color: Colors.grey,
+            child: Text(Strings.editProfile),
           ),
           Divider(thickness: 1.h),
           Expanded(

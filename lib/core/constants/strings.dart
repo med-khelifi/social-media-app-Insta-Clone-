@@ -23,4 +23,8 @@ class Strings {
   static const String comments ="Comments";
 
   static String signupSuccessful = "Account Created Successfully !";
+
+  static var signupFailed;
+
+  static var loginFailed;
 }

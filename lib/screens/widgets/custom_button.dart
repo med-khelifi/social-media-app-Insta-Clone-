@@ -5,11 +5,11 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     this.onPressed,
-    required this.text,
+    required this.child,
     this.color = ColorsManager.blue,
   });
   final VoidCallback? onPressed;
-  final String text;
+  final Widget child;
   final Color color;
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class CustomButton extends StatelessWidget {
       minWidth: double.infinity,
       color: color,
       onPressed: onPressed,
-      child: Text(text),
+      child: child,
     );
   }
 }

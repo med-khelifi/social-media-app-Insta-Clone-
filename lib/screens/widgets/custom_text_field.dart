@@ -9,11 +9,13 @@ class CustomTextField extends StatelessWidget {
     this.onSuffixIconPressed,
     this.validator,
     this.controller,
+    this.showPassword = false,
   });
   final String label;
   final String? hint;
   final VoidCallback? onSuffixIconPressed;
-  final bool? isPassword;
+  final bool isPassword;
+  final bool showPassword;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
 
@@ -22,12 +24,14 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
-      obscureText: isPassword ?? false,
+      obscureText: !showPassword && isPassword,
       decoration: InputDecoration(
-        suffixIcon: isPassword ?? false
+        suffixIcon: isPassword
             ? IconButton(
-                onPressed: isPassword ?? false ? onSuffixIconPressed : null,
-                icon: Icon(Icons.visibility_off),
+                onPressed: isPassword ? onSuffixIconPressed : null,
+                icon: showPassword
+                    ? Icon(Icons.visibility)
+                    : Icon(Icons.visibility_off),
               )
             : null,
         label: Text(label),

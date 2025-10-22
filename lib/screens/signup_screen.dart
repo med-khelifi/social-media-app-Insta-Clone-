@@ -4,8 +4,10 @@ import 'package:insta/controllers/signup_screen_controller.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/provider/auth_provider.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,6 +18,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   late SignupScreenController _controller;
+
   @override
   void initState() {
     super.initState();
@@ -23,17 +26,23 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Consumer<AuthProviderState>(
+            builder: (context, auth, _) => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                VerticalSpace(60.h),
                 Text(
                   Strings.instaApp,
                   style: TextStyle(
@@ -41,15 +50,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                VerticalSpace(10.h),
+                VerticalSpace(30.h),
                 Form(
                   key: _controller.formKey,
                   child: Column(
                     children: [
                       CustomTextField(
                         label: Strings.username,
-                        validator: _controller.validateUsername,
                         controller: _controller.usernameController,
+                        validator: _controller.validateUsername,
                       ),
                       VerticalSpace(10.h),
                       CustomTextField(
@@ -59,19 +68,31 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       VerticalSpace(10.h),
                       CustomTextField(
+                        showPassword: auth.isPasswordVisible,
+                        label: Strings.password,
                         controller: _controller.passwordController,
                         validator: _controller.validatePassword,
-                        label: Strings.password,
                         isPassword: true,
+                        onSuffixIconPressed: auth.togglePasswordVisibility,
                       ),
                     ],
                   ),
                 ),
-                VerticalSpace(10.h),
+                VerticalSpace(20.h),
                 CustomButton(
-                  text: Strings.signup,
-                  onPressed: () => _controller.signup(context),
+                  onPressed: auth.isLoading ? null : () => auth.signup(context),
+                  child: auth.isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          Strings.signup,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
+                VerticalSpace(10.h),
                 TextButton(
                   onPressed: () => _controller.goToLoginScreen(context),
                   child: Text(
