@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/controllers/signup_screen_controller.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
-import 'package:insta/core/constants/images_paths.dart';
 import 'package:insta/core/constants/strings.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/custom_text_field.dart';
@@ -28,63 +27,63 @@ class _SignupScreenState extends State<SignupScreen> {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    Strings.instaApp,
-                    style: TextStyle(
-                      fontSize: 32.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  Strings.instaApp,
+                  style: TextStyle(
+                    fontSize: 32.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-                  VerticalSpace(10.h),
-                  CircleAvatar(
-                    radius: 60.r,
-                    backgroundColor: Colors.grey,
-                    backgroundImage: AssetImage(ImagesPaths.placeholder),
-                  ),
-                  VerticalSpace(10.h),
-                  Form(
-                    key: _controller.formKey,
-                    child: Column(
-                      children: [
-                        CustomTextField(label: Strings.username),
-                        VerticalSpace(10.h),
-                        CustomTextField(label: Strings.email,controller: _controller.emailController,validator: _controller.validateEmail,),
-                        VerticalSpace(10.h),
-                        CustomTextField(
-                          controller: _controller.passwordController,
-                          validator: _controller.validatePassword,
-                          label: Strings.password,
-                          isPassword: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  VerticalSpace(10.h),
-                  CustomButton(
-                    text: Strings.signup,
-                    onPressed: () => _controller.signup(context),
-                  ),
-                  TextButton(
-                    onPressed: () => _controller.goToLoginScreen(context),
-                    child: Text(
-                      Strings.alreadyHaveAcc,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: ColorsManager.blue,
+                ),
+                VerticalSpace(10.h),
+                Form(
+                  key: _controller.formKey,
+                  child: Column(
+                    children: [
+                      CustomTextField(
+                        label: Strings.username,
+                        validator: _controller.validateUsername,
+                        controller: _controller.usernameController,
                       ),
+                      VerticalSpace(10.h),
+                      CustomTextField(
+                        label: Strings.email,
+                        controller: _controller.emailController,
+                        validator: _controller.validateEmail,
+                      ),
+                      VerticalSpace(10.h),
+                      CustomTextField(
+                        controller: _controller.passwordController,
+                        validator: _controller.validatePassword,
+                        label: Strings.password,
+                        isPassword: true,
+                      ),
+                    ],
+                  ),
+                ),
+                VerticalSpace(10.h),
+                CustomButton(
+                  text: Strings.signup,
+                  onPressed: () => _controller.signup(context),
+                ),
+                TextButton(
+                  onPressed: () => _controller.goToLoginScreen(context),
+                  child: Text(
+                    Strings.alreadyHaveAcc,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: ColorsManager.blue,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
