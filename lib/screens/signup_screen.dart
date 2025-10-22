@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:insta/controllers/signup_screen_controller.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/strings.dart';
@@ -9,27 +8,8 @@ import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/custom_text_field.dart';
 import 'package:provider/provider.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
-
-  @override
-  State<SignupScreen> createState() => _SignupScreenState();
-}
-
-class _SignupScreenState extends State<SignupScreen> {
-  late SignupScreenController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SignupScreenController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,26 +32,26 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 VerticalSpace(30.h),
                 Form(
-                  key: _controller.formKey,
+                  key: auth.signupController.formKey,
                   child: Column(
                     children: [
                       CustomTextField(
                         label: Strings.username,
-                        controller: _controller.usernameController,
-                        validator: _controller.validateUsername,
+                        controller: auth.signupController.usernameController,
+                        validator: auth.signupController.validateUsername,
                       ),
                       VerticalSpace(10.h),
                       CustomTextField(
                         label: Strings.email,
-                        controller: _controller.emailController,
-                        validator: _controller.validateEmail,
+                        controller: auth.signupController.emailController,
+                        validator: auth.signupController.validateEmail,
                       ),
                       VerticalSpace(10.h),
                       CustomTextField(
                         showPassword: auth.isPasswordVisible,
                         label: Strings.password,
-                        controller: _controller.passwordController,
-                        validator: _controller.validatePassword,
+                        controller: auth.signupController.passwordController,
+                        validator: auth.signupController.validatePassword,
                         isPassword: true,
                         onSuffixIconPressed: auth.togglePasswordVisibility,
                       ),
@@ -80,7 +60,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 VerticalSpace(20.h),
                 CustomButton(
-                  onPressed: auth.isLoading ? null : () => auth.signup(context),
+                  onPressed: auth.isLoading
+                      ? null
+                      : () async {
+                          await auth.signup(
+                            context,
+                          );
+                        },
                   child: auth.isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
@@ -94,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 VerticalSpace(10.h),
                 TextButton(
-                  onPressed: () => _controller.goToLoginScreen(context),
+                  onPressed: () => auth.signupController.goToLoginScreen(context),
                   child: Text(
                     Strings.alreadyHaveAcc,
                     style: TextStyle(

@@ -15,8 +15,13 @@ class AuthProviderState extends ChangeNotifier {
   bool _isPasswordVisible = false;
   bool get isPasswordVisible => _isPasswordVisible;
 
-  final LoginScreenController loginController = LoginScreenController();
-  final SignupScreenController signupController = SignupScreenController();
+  late final SignupScreenController signupController;
+  late final LoginScreenController loginController;
+  
+  AuthProviderState() {
+    loginController = LoginScreenController();
+    signupController = SignupScreenController();
+  }
 
   void togglePasswordVisibility() {
     _isPasswordVisible = !_isPasswordVisible;
@@ -30,8 +35,9 @@ class AuthProviderState extends ChangeNotifier {
 
   // 🔹 LOGIN
   Future<void> login(BuildContext context) async {
-    if (!loginController.formKey.currentState!.validate()) return;
-
+    if (!loginController.formKey.currentState!.validate()) {
+      return;
+    }
     _setLoading(true);
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -55,7 +61,9 @@ class AuthProviderState extends ChangeNotifier {
 
   // 🔹 SIGNUP
   Future<void> signup(BuildContext context) async {
-    if (!signupController.formKey.currentState!.validate()) return;
+    if (!signupController.formKey.currentState!.validate()) {
+      return;
+    }
 
     _setLoading(true);
     try {
@@ -65,6 +73,10 @@ class AuthProviderState extends ChangeNotifier {
 
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
+      if (userCredential.user == null) {
+        throw Exception('Failed to create user: user is null');
+      }
 
       final uid = userCredential.user!.uid;
 
@@ -87,13 +99,18 @@ class AuthProviderState extends ChangeNotifier {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(Strings.signupSuccessful)));
-        Navigator.pushReplacementNamed(context, RoutesNames.login);
       }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? Strings.signupFailed)),
         );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       _setLoading(false);

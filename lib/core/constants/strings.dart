@@ -24,7 +24,7 @@ class Strings {
 
   static String signupSuccessful = "Account Created Successfully !";
 
-  static var signupFailed;
+  static var signupFailed = "Signup Failed. Please try again.";
 
-  static var loginFailed;
+  static var loginFailed = "Login Failed. Please try again.";
 }

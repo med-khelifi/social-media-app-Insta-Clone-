@@ -3,10 +3,17 @@ import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
 
 class SignupScreenController {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  late final GlobalKey<FormState> formKey;
+  late final TextEditingController usernameController;
+  late final TextEditingController passwordController;
+  late final TextEditingController emailController;
+
+  SignupScreenController() {
+    formKey = GlobalKey<FormState>();
+    usernameController = TextEditingController();
+    passwordController = TextEditingController();
+    emailController = TextEditingController();
+  }
 
   void dispose() {
     usernameController.dispose();
