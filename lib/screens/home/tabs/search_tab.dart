@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/core/constants/colors.dart';
-import 'package:insta/core/constants/constants_widgets.dart';
 
 class SearchTab extends StatelessWidget {
   const SearchTab({super.key});
@@ -27,7 +26,6 @@ class SearchTab extends StatelessWidget {
             ),
           ),
         ),
-
         Expanded(
           child: ListView.builder(
             itemCount: 10,

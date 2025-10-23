@@ -27,4 +27,6 @@ class Strings {
   static var signupFailed = "Signup Failed. Please try again.";
 
   static var loginFailed = "Login Failed. Please try again.";
+
+  static String postUploadedSuccessfully = "Post Uploaded";
 }

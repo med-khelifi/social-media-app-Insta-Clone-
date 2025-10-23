@@ -76,7 +76,6 @@ class _ProfileTabState extends State<ProfileTab> {
                       : NetworkImage(user.profileImageUrl!),
                 ),
                 HorizontalSpace(16.w),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,7 +104,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
           VerticalSpace(6.h),
           Text(
-            user.bio ?? "This is my bio",
+            user.bio,
             style: TextStyle(fontSize: 14.sp),
           ),
           CustomButton(
