@@ -2,29 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
+import 'package:insta/core/models/post.dart';
 
 class PostWidget extends StatelessWidget {
-  const PostWidget({super.key, required this.onCommentIconPressed});
-   final VoidCallback onCommentIconPressed;
+  const PostWidget({
+    super.key,
+    required this.onCommentIconPressed,
+    required this.post,
+  });
+  final VoidCallback onCommentIconPressed;
+  final PostModel post;
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            CircleAvatar(backgroundImage: AssetImage(ImagesPaths.placeholder)),
-            HorizontalSpace(8.w),
-            Text('username'),
-            const Spacer(),
-            IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
-          ],
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage:
+                    post.userImage == null || post.userImage!.isEmpty
+                    ? AssetImage(ImagesPaths.placeholder)
+                    : NetworkImage(post.userImage!),
+              ),
+              HorizontalSpace(8.w),
+              Text(post.username),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+            ],
+          ),
         ),
         VerticalSpace(8.h),
-        Image.asset(
-          ImagesPaths.placeholder,
-          fit: BoxFit.cover,
-          width: double.infinity,
+        if (post.imageUrl.isNotEmpty)
+          Image.network(post.imageUrl)
+        else
+          SizedBox(),
+        VerticalSpace(4.h),
+        Padding(
+          padding: EdgeInsets.only(left: 10.h),
+          child: Text(post.caption),
         ),
         VerticalSpace(4.h),
         Row(

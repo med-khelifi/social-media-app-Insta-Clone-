@@ -27,21 +27,43 @@ class _PostsTabState extends State<PostsTab> {
         children: [
           PostTabHeader(),
           VerticalSpace(10.h),
-          ListView.builder(
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 10.h),
-                child: PostWidget(
-                  onCommentIconPressed: () =>
-                      _controller.onCommentIconPressed(context),
-                ),
-              );
+          StreamBuilder(
+            stream: _controller.postsStream,
+            builder: (context, asyncSnapshot) {
+              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (asyncSnapshot.hasError) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('error : ${asyncSnapshot.error}')),
+                  );
+                });
+                return Center(child: Text('Error loading posts'));
+              } else if (!asyncSnapshot.hasData) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('error : empty response')),
+                  );
+                });
+                return Center(child: Text('No posts'));
+              } else {
+                return ListView.builder(
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: PostWidget(
+                        onCommentIconPressed: () =>
+                            _controller.onCommentIconPressed(context), post: asyncSnapshot.data![index],
+                      ),
+                    );
+                  },
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: asyncSnapshot.data?.length,
+                );
+              }
             },
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 5,
           ),
-          // StoriesSection(),
         ],
       ),
     );
