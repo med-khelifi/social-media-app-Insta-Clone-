@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:insta/core/constants/routes.dart';
+import 'package:insta/core/constants/strings.dart';
 
 class ProfileTabController {
   ProfileTabController();
@@ -12,16 +13,16 @@ class ProfileTabController {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out?'),
+          title: const Text(Strings.signout),
+          content: const Text(Strings.areUSureToSignout),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: const Text(Strings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Sign Out'),
+              child: const Text(Strings.signout),
             ),
           ],
         );

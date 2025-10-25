@@ -9,9 +9,14 @@ class PostWidget extends StatelessWidget {
     super.key,
     required this.onCommentIconPressed,
     required this.post,
+    required this.onLikeIconPressed,
+    required this.likeIconColor, required this.showDeleteIcon,
   });
   final VoidCallback onCommentIconPressed;
+  final VoidCallback onLikeIconPressed;
   final PostModel post;
+  final Color likeIconColor;
+  final bool showDeleteIcon;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -31,7 +36,8 @@ class PostWidget extends StatelessWidget {
               HorizontalSpace(8.w),
               Text(post.username),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+              if (showDeleteIcon)
+                IconButton(icon: const Icon(Icons.delete), onPressed: () {}),
             ],
           ),
         ),
@@ -49,9 +55,11 @@ class PostWidget extends StatelessWidget {
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.favorite_border),
-              onPressed: () {},
+              icon: Icon(Icons.favorite, color: likeIconColor),
+              onPressed: onLikeIconPressed,
             ),
+            HorizontalSpace(2.w),
+            Text(post.likes.length.toString()),
             IconButton(
               icon: const Icon(Icons.comment_outlined),
               onPressed: onCommentIconPressed,

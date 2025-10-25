@@ -4,6 +4,7 @@ class Strings {
   static const String password = 'Password';
   static const String login = 'Login';
   static const String signup = 'Sign Up';
+  static const String signout = 'Sign Out';
   static const String email = 'Email';
   static const String next = 'Next';
   static const String dontHaveAcc = "Don't have an account? Sign Up";
@@ -29,4 +30,6 @@ class Strings {
   static var loginFailed = "Login Failed. Please try again.";
 
   static String postUploadedSuccessfully = "Post Uploaded";
+  static const String areUSureToSignout = 'Are you sure you want to sign out?';
+  static const String cancel = 'Cancel';
 }

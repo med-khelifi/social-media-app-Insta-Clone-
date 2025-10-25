@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta/core/constants/strings.dart';
-import 'package:insta/core/firebase/firebase_settings.dart';
+import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/models/post.dart';
 import 'package:insta/core/models/user.dart';
 import 'package:insta/core/provider/user_provider.dart';
@@ -14,8 +13,9 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewPostScreenController {
-  late final SupabaseStorageService storageService;
+  late final SupabaseStorageService _storageService;
   late final TextEditingController captionTextController;
+  late FirebaseStoreMethods _firebaseStoreMethods;
   late UserModel currentUser;
   File? file;
   final StreamController<File?> imageStreamController =
@@ -29,7 +29,8 @@ class AddNewPostScreenController {
 
   AddNewPostScreenController() {
     captionTextController = TextEditingController();
-    storageService = SupabaseStorageService();
+    _storageService = SupabaseStorageService();
+    _firebaseStoreMethods = FirebaseStoreMethods();
   }
   void takePhoto() async {
     file = await Util.takeImage(ImageSource.gallery);
@@ -44,7 +45,7 @@ class AddNewPostScreenController {
     final user = userProvider.getUser;
     if (user == null) return;
     if (file == null) return;
-    final imageUrl = await storageService.uploadUserImage(
+    final imageUrl = await _storageService.uploadUserImage(
       context,
       file!,
       user.uid,
@@ -65,10 +66,7 @@ class AddNewPostScreenController {
       createdAt: DateTime.now(),
     );
 
-    await FirebaseFirestore.instance
-        .collection(FirebaseSettings.postsCollection)
-        .doc(postId)
-        .set(post.toJson());
+    _firebaseStoreMethods.addPost(post);
 
     if (context.mounted) {
       Util.showSnackBar(Strings.postUploadedSuccessfully, context: context);

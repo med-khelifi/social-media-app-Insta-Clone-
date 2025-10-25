@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/controllers/posts_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
+import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/screens/home/widgets/post_tab_header.dart';
 import 'package:insta/screens/home/widgets/post_widget.dart';
 
@@ -53,7 +54,19 @@ class _PostsTabState extends State<PostsTab> {
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: PostWidget(
                         onCommentIconPressed: () =>
-                            _controller.onCommentIconPressed(context), post: asyncSnapshot.data![index],
+                            _controller.onCommentIconPressed(context),
+                        post: asyncSnapshot.data![index],
+                        onLikeIconPressed: () => _controller.toggleLike(
+                          asyncSnapshot.data![index].id,
+                          FirebaseAuthSettings.currentUserId,
+                        ),
+                        likeIconColor: _controller.getLikeIconColor(
+                          asyncSnapshot.data![index].likes,
+                          FirebaseAuthSettings.currentUserId,
+                        ),
+                        showDeleteIcon:
+                            FirebaseAuthSettings.currentUserId ==
+                            asyncSnapshot.data![index].userId,
                       ),
                     );
                   },

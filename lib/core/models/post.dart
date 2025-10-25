@@ -5,7 +5,7 @@ class PostModel {
   final String? userImage;
   final String imageUrl;
   final String caption;
-  final List<String> likes; // list of userIds who liked the post
+  final List<String> likes;
   final DateTime createdAt;
 
   PostModel({
