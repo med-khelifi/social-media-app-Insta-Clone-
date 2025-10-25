@@ -33,10 +33,23 @@ class SupabaseStorageService {
       return publicUrl;
     } catch (e) {
       if (context.mounted) {
-        Util.showSnackBar('Upload failed: $e',context: context);
+        Util.showSnackBar('Upload failed: $e', context: context);
       }
       return null;
     }
   }
-  
+
+  Future<(bool deleted, String? error)> deleteImage(
+    BuildContext context,
+    String path,
+  ) async {
+    try {
+      await _client.storage.from(SupabaseSettings.postsImagesBucketName).remove(
+        [path],
+      );
+      return (true, null);
+    } catch (e) {
+      return (true, e.toString());
+    }
+  }
 }

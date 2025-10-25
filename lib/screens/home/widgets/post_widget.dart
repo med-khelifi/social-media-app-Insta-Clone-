@@ -10,10 +10,13 @@ class PostWidget extends StatelessWidget {
     required this.onCommentIconPressed,
     required this.post,
     required this.onLikeIconPressed,
-    required this.likeIconColor, required this.showDeleteIcon,
+    required this.likeIconColor,
+    required this.showDeleteIcon,
+    required this.deletePostPressed,
   });
   final VoidCallback onCommentIconPressed;
   final VoidCallback onLikeIconPressed;
+  final VoidCallback deletePostPressed;
   final PostModel post;
   final Color likeIconColor;
   final bool showDeleteIcon;
@@ -37,7 +40,10 @@ class PostWidget extends StatelessWidget {
               Text(post.username),
               const Spacer(),
               if (showDeleteIcon)
-                IconButton(icon: const Icon(Icons.delete), onPressed: () {}),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: deletePostPressed,
+                ),
             ],
           ),
         ),

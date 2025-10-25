@@ -67,6 +67,12 @@ class _PostsTabState extends State<PostsTab> {
                         showDeleteIcon:
                             FirebaseAuthSettings.currentUserId ==
                             asyncSnapshot.data![index].userId,
+                        deletePostPressed: () => _controller.deletePost(
+                          context,
+                          asyncSnapshot.data![index].id,
+                          asyncSnapshot.data![index].userId,
+                          asyncSnapshot.data![index].imageUrl,
+                        ),
                       ),
                     );
                   },

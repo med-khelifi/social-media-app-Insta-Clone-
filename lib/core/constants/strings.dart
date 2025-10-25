@@ -21,7 +21,7 @@ class Strings {
   static const String followers = 'Followers';
   static const String following = 'following';
   static const String editProfile = "Edit Profile";
-  static const String comments ="Comments";
+  static const String comments = "Comments";
 
   static String signupSuccessful = "Account Created Successfully !";
 
@@ -32,4 +32,6 @@ class Strings {
   static String postUploadedSuccessfully = "Post Uploaded";
   static const String areUSureToSignout = 'Are you sure you want to sign out?';
   static const String cancel = 'Cancel';
+
+  static const String postDeleted = "Post deleted";
 }
