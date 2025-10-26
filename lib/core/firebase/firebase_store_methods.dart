@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
+import 'package:insta/core/models/comment.dart';
 import 'package:insta/core/models/post.dart';
 import 'package:insta/core/models/user.dart';
 
@@ -53,4 +54,13 @@ class FirebaseStoreMethods {
           .delete();
     }
   }
+
+  Future<void> addComment(CommentModel comment) async {
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.commentsCollection)
+        .doc(comment.id)
+        .set(comment.toMap());
+  }
+
+
 }

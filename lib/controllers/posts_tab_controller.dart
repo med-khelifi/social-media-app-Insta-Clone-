@@ -28,8 +28,12 @@ class PostsTabController {
         );
   }
 
-  void onCommentIconPressed(BuildContext context) {
-    Navigator.pushNamed(context, RoutesNames.comments);
+  void onCommentIconPressed(BuildContext context, String postId) {
+    Navigator.pushNamed(
+      context,
+      RoutesNames.comments,
+      arguments: {"postId": postId},
+    );
   }
 
   void toggleLike(String postId, String userId) async {

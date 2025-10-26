@@ -54,7 +54,10 @@ class _PostsTabState extends State<PostsTab> {
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: PostWidget(
                         onCommentIconPressed: () =>
-                            _controller.onCommentIconPressed(context),
+                            _controller.onCommentIconPressed(
+                              context,
+                              asyncSnapshot.data![index].id,
+                            ),
                         post: asyncSnapshot.data![index],
                         onLikeIconPressed: () => _controller.toggleLike(
                           asyncSnapshot.data![index].id,
