@@ -54,7 +54,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
                           radius: 20,
-                          backgroundImage: data[index].userImage.isEmpty || data[index].userImage == "" 
+                          backgroundImage:
+                              data[index].userImage.isEmpty ||
+                                  data[index].userImage == ""
                               ? AssetImage(ImagesPaths.placeholder)
                               : NetworkImage(data[index].userImage),
                         ),
@@ -63,6 +65,34 @@ class _CommentsScreenState extends State<CommentsScreen> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(data[index].text),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_controller.showDeleteIcon(data[index].userId))
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _controller.deleteComment(
+                                  context,
+                                  data[index].id,
+                                ),
+                              ),
+                            Text(
+                              data[index].likes.isEmpty
+                                  ? ""
+                                  : data[index].likes.length.toString(),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.favorite,
+                                color: _controller.getLikeIconColor(
+                                  data[index].likes,
+                                ),
+                              ),
+                              onPressed: () =>
+                                  _controller.toggleLike(data[index].id),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   );
@@ -78,7 +108,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 CircleAvatar(
                   radius: 20,
                   backgroundImage:
-                      _controller.getCurrentUserImage(context) == null || _controller.getCurrentUserImage(context)!.isEmpty
+                      _controller.getCurrentUserImage(context) == null ||
+                          _controller.getCurrentUserImage(context)!.isEmpty
                       ? AssetImage(ImagesPaths.placeholder)
                       : NetworkImage(_controller.getCurrentUserImage(context)!),
                 ),

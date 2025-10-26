@@ -65,7 +65,7 @@ class PostWidget extends StatelessWidget {
               onPressed: onLikeIconPressed,
             ),
             HorizontalSpace(2.w),
-            Text(post.likes.length.toString()),
+            Text(post.likes.isEmpty ? "" : post.likes.length.toString()),
             IconButton(
               icon: const Icon(Icons.comment_outlined),
               onPressed: onCommentIconPressed,

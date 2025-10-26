@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/models/post.dart';
@@ -11,6 +12,9 @@ import 'package:insta/core/util/util.dart';
 class PostsTabController {
   late FirebaseStoreMethods _firebaseStoreMethods;
   late SupabaseStorageService _storageService;
+
+  bool showDeleteIcon(String postCreatedByUserId) =>
+      FirebaseAuthSettings.currentUserId == postCreatedByUserId;
   PostsTabController() {
     _firebaseStoreMethods = FirebaseStoreMethods();
     _storageService = SupabaseStorageService();
@@ -36,24 +40,19 @@ class PostsTabController {
     );
   }
 
-  void toggleLike(String postId, String userId) async {
-    await _firebaseStoreMethods.togglePostLike(postId, userId);
+  void toggleLike(String postId) async {
+    await _firebaseStoreMethods.togglePostLike(postId);
   }
 
-  bool _isLiked(List<String> likes, String userId) {
-    return likes.contains(userId);
+  bool _isLiked(List<String> likes) {
+    return likes.contains(FirebaseAuthSettings.currentUserId);
   }
 
-  Color getLikeIconColor(List<String> likes, String userId) {
-    return _isLiked(likes, userId) ? Colors.red : Colors.white;
+  Color getLikeIconColor(List<String> likes) {
+    return _isLiked(likes) ? Colors.red : Colors.white;
   }
 
-  void deletePost(
-    BuildContext context,
-    String postId,
-    String userId,
-    String imagePath,
-  ) async {
+  void deletePost(BuildContext context, String postId, String imagePath) async {
     if (imagePath.isNotEmpty) {
       var res = await _storageService.deleteImage(context, imagePath);
       if (!res.$1) {
@@ -63,7 +62,7 @@ class PostsTabController {
       }
     }
 
-    await _firebaseStoreMethods.deletePost(postId, userId);
+    await _firebaseStoreMethods.deletePost(postId);
     if (context.mounted) {
       Util.showSnackBar(Strings.postDeleted, context: context);
     }

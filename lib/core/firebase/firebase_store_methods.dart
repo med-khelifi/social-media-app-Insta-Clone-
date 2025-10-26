@@ -24,7 +24,7 @@ class FirebaseStoreMethods {
         .set(post.toJson());
   }
 
-  Future<void> togglePostLike(String postId, String userId) async {
+  Future<void> togglePostLike(String postId) async {
     final postRef = FirebaseFirestore.instance
         .collection(FirebaseSettings.postsCollection)
         .doc(postId);
@@ -34,23 +34,52 @@ class FirebaseStoreMethods {
     if (postDoc.exists) {
       List likes = (postDoc.data() as Map<String, dynamic>)['likes'] ?? [];
 
-      if (likes.contains(userId)) {
+      if (likes.contains(FirebaseAuthSettings.currentUserId)) {
         await postRef.update({
-          'likes': FieldValue.arrayRemove([userId]),
+          'likes': FieldValue.arrayRemove([FirebaseAuthSettings.currentUserId,]),
         });
       } else {
         await postRef.update({
-          'likes': FieldValue.arrayUnion([userId]),
+          'likes': FieldValue.arrayUnion([FirebaseAuthSettings.currentUserId,]),
+        });
+      }
+    }
+  }
+  Future<void> toggleCommentLike(String commentId) async {
+    final postRef = FirebaseFirestore.instance
+        .collection(FirebaseSettings.commentsCollection)
+        .doc(commentId);
+
+    DocumentSnapshot postDoc = await postRef.get();
+
+    if (postDoc.exists) {
+      List likes = (postDoc.data() as Map<String, dynamic>)['likes'] ?? [];
+
+      if (likes.contains(FirebaseAuthSettings.currentUserId,)) {
+        await postRef.update({
+          'likes': FieldValue.arrayRemove([FirebaseAuthSettings.currentUserId,]),
+        });
+      } else {
+        await postRef.update({
+          'likes': FieldValue.arrayUnion([FirebaseAuthSettings.currentUserId,]),
         });
       }
     }
   }
 
-  Future<void> deletePost(String postId, String userId) async {
-    if (FirebaseAuthSettings.currentUserId == userId) {
+  Future<void> deletePost(String postId) async {
+    if (FirebaseAuthSettings.currentUserId == FirebaseAuthSettings.currentUserId) {
       await FirebaseFirestore.instance
           .collection(FirebaseSettings.postsCollection)
           .doc(postId)
+          .delete();
+    }
+  }
+  Future<void> deleteComments(String commentId) async {
+    if (FirebaseAuthSettings.currentUserId == FirebaseAuthSettings.currentUserId) {
+      await FirebaseFirestore.instance
+          .collection(FirebaseSettings.commentsCollection)
+          .doc(commentId)
           .delete();
     }
   }

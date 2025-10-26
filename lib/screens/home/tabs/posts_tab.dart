@@ -61,18 +61,15 @@ class _PostsTabState extends State<PostsTab> {
                         post: asyncSnapshot.data![index],
                         onLikeIconPressed: () => _controller.toggleLike(
                           asyncSnapshot.data![index].id,
-                          FirebaseAuthSettings.currentUserId,
                         ),
                         likeIconColor: _controller.getLikeIconColor(
                           asyncSnapshot.data![index].likes,
-                          FirebaseAuthSettings.currentUserId,
                         ),
-                        showDeleteIcon:
-                            FirebaseAuthSettings.currentUserId ==
-                            asyncSnapshot.data![index].userId,
+                        showDeleteIcon: _controller.showDeleteIcon(
+                          asyncSnapshot.data![index].userId,
+                        ),
                         deletePostPressed: () => _controller.deletePost(
                           context,
-                          asyncSnapshot.data![index].id,
                           asyncSnapshot.data![index].userId,
                           asyncSnapshot.data![index].imageUrl,
                         ),

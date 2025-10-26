@@ -25,8 +25,8 @@ class _ProfileTabState extends State<ProfileTab> {
     _controller = ProfileTabController();
 
     // تحميل بيانات المستخدم بعد بناء الواجهة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).getUserData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<UserProvider>(context, listen: false).getUserData();
     });
   }
 

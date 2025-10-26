@@ -5,8 +5,11 @@ import 'package:insta/controllers/login_screen_controller.dart';
 import 'package:insta/controllers/signup_screen_controller.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/core/models/user.dart';
+import 'package:insta/core/provider/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class AuthProviderState extends ChangeNotifier {
   bool _isLoading = false;
@@ -44,7 +47,8 @@ class AuthProviderState extends ChangeNotifier {
         email: loginController.emailController.text.trim(),
         password: loginController.passwordController.text.trim(),
       );
-
+      FirebaseAuthSettings.refreshCurrentUserId();
+      await Provider.of<UserProvider>(context, listen: false).getUserData();
       if (context.mounted) {
         Navigator.pushReplacementNamed(context, RoutesNames.home);
       }

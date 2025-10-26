@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/models/comment.dart';
@@ -9,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CommentsScreenController {
+  bool showDeleteIcon(String commentCreatedByUserId) =>
+      FirebaseAuthSettings.currentUserId == commentCreatedByUserId;
   late TextEditingController commentController;
   late String postId;
   late final FirebaseStoreMethods _firebaseStoreMethods;
@@ -29,13 +32,15 @@ class CommentsScreenController {
               .toList(),
         );
   }
-  String? getCurrentUserImage(BuildContext context){
+
+  String? getCurrentUserImage(BuildContext context) {
     final userProvider = context.read<UserProvider>();
-      userProvider.getUserData();
-      final user = userProvider.getUser;
-      if (user == null) return null;
-      return user.profileImageUrl;
+    userProvider.getUserData();
+    final user = userProvider.getUser;
+    if (user == null) return null;
+    return user.profileImageUrl;
   }
+
   void addComment({required BuildContext context}) async {
     try {
       final userProvider = context.read<UserProvider>();
@@ -61,6 +66,25 @@ class CommentsScreenController {
       if (context.mounted) {
         Util.showSnackBar("error: ${e.toString()}", context: context);
       }
+    }
+  }
+
+  void toggleLike(String commentId) async {
+    await _firebaseStoreMethods.toggleCommentLike(commentId);
+  }
+
+  bool _isLiked(List<String> likes) {
+    return likes.contains(FirebaseAuthSettings.currentUserId);
+  }
+
+  Color getLikeIconColor(List<String> likes) {
+    return _isLiked(likes) ? Colors.red : Colors.white;
+  }
+
+  void deleteComment(BuildContext context, String commentId) async {
+    await _firebaseStoreMethods.deleteComments(commentId);
+    if (context.mounted) {
+      Util.showSnackBar("comment deleted", context: context);
     }
   }
 }
