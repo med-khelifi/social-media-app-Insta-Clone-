@@ -16,6 +16,16 @@ class FirebaseStoreMethods {
     UserModel? userModel = UserModel.fromDocument(user);
     return userModel;
   }
+  Stream<List<UserModel>> getSearchedUserData(String userName) {
+    return FirebaseFirestore
+        .instance
+        .collection(FirebaseSettings.usersCollection)
+        .where("username", isGreaterThanOrEqualTo: userName)
+        .where("username", isLessThan: userName + 'z')
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((e) => UserModel.fromDocument(e)).toList());
+  }
 
   void addPost(PostModel post) async {
     await FirebaseFirestore.instance
