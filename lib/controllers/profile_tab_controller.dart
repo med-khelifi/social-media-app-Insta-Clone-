@@ -2,9 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/firebase/firebase_store_methods.dart';
+import 'package:insta/core/models/post.dart';
 
 class ProfileTabController {
-  ProfileTabController();
+  late FirebaseStoreMethods _firebaseStoreMethods;
+  ProfileTabController(){
+    _firebaseStoreMethods = FirebaseStoreMethods();
+  }
   void init() {}
   void dispose() {}
 
@@ -42,5 +47,9 @@ class ProfileTabController {
         ).showSnackBar(SnackBar(content: Text('Error signing out: $error')));
       }
     }
+  }
+
+  Future<List<PostModel>> getUserPost({String? userId}){
+    return _firebaseStoreMethods.getUserPosts(uid: userId);
   }
 }

@@ -62,7 +62,7 @@ class _SearchTabState extends State<SearchTab> {
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      onTap: () => _controller.onUserListTileItemPressed(data[index].uid),
+                      onTap: () => _controller.onUserListTileItemPressed(context,data[index].uid),
                       leading: CircleAvatar(
                         backgroundImage:
                             data[index].profileImageUrl == null ||

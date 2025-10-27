@@ -6,22 +6,33 @@ import 'package:insta/core/models/post.dart';
 import 'package:insta/core/models/user.dart';
 
 class FirebaseStoreMethods {
-  Future<UserModel> getCurrentUserData() async {
+  Future<UserModel> getCurrentUserData({String? uid}) async {
     DocumentSnapshot<Map<String, dynamic>> user = await FirebaseFirestore
         .instance
         .collection(FirebaseSettings.usersCollection)
-        .doc(FirebaseAuthSettings.currentUserId)
+        .doc(uid ?? FirebaseAuthSettings.currentUserId)
         .get();
 
     UserModel? userModel = UserModel.fromDocument(user);
     return userModel;
+  }
+  Future<List<PostModel>> getUserPosts({String? uid}) async {
+    var userId = uid ?? FirebaseAuthSettings.currentUserId;
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection(FirebaseSettings.postsCollection)
+        .where("userId", isEqualTo: userId)
+        .get();
+
+    List<PostModel> posts = snapshot.docs.map((e) => PostModel.fromJson(e.data())).toList();
+    return posts;
   }
   Stream<List<UserModel>> getSearchedUserData(String userName) {
     return FirebaseFirestore
         .instance
         .collection(FirebaseSettings.usersCollection)
         .where("username", isGreaterThanOrEqualTo: userName)
-        .where("username", isLessThan: userName + 'z')
+        .where("username", isLessThan: '${userName}z')
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((e) => UserModel.fromDocument(e)).toList());

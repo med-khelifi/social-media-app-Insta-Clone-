@@ -6,8 +6,8 @@ class UserProvider with ChangeNotifier {
   UserModel? _user;
   UserModel? get getUser => _user;
   FirebaseStoreMethods firebaseStoreMethods = FirebaseStoreMethods();
-  Future<void> getUserData() async {
-    _user = await firebaseStoreMethods.getCurrentUserData();
+  Future<void> getUserData({String? uid}) async {
+    _user = await firebaseStoreMethods.getCurrentUserData(uid: uid);
     notifyListeners();
   }
 }

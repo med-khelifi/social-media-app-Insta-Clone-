@@ -1,5 +1,7 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:insta/controllers/profile_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/core/constants/images_paths.dart';
@@ -7,10 +9,10 @@ import 'package:insta/core/constants/strings.dart';
 import 'package:insta/core/provider/user_provider.dart';
 import 'package:insta/screens/widgets/custom_button.dart';
 import 'package:insta/screens/widgets/stats_info.dart';
-import 'package:provider/provider.dart';
 
 class ProfileTab extends StatefulWidget {
-  const ProfileTab({super.key});
+  final String? userId;
+  const ProfileTab({super.key, this.userId});
 
   @override
   State<ProfileTab> createState() => _ProfileTabState();
@@ -24,9 +26,11 @@ class _ProfileTabState extends State<ProfileTab> {
     super.initState();
     _controller = ProfileTabController();
 
-    // تحميل بيانات المستخدم بعد بناء الواجهة
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<UserProvider>(context, listen: false).getUserData();
+      await Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).getUserData(uid: widget.userId);
     });
   }
 
@@ -34,7 +38,6 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
-    // إذا البيانات مازالت تتحمل
     if (userProvider.getUser == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -46,10 +49,11 @@ class _ProfileTabState extends State<ProfileTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// ===== HEADER =====
           Row(
             children: [
               Text(
-                user.username ?? "Profile",
+                user.username,
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -61,7 +65,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
           VerticalSpace(10.h),
 
-          /// Profile Info Row
+          /// ===== PROFILE INFO =====
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0.h),
             child: Row(
@@ -69,10 +73,10 @@ class _ProfileTabState extends State<ProfileTab> {
               children: [
                 CircleAvatar(
                   radius: 45.r,
-                  backgroundImage: (user.profileImageUrl == null ||
+                  backgroundImage:
+                      (user.profileImageUrl == null ||
                           user.profileImageUrl!.isEmpty)
-                      ? AssetImage(ImagesPaths.placeholder)
-                          as ImageProvider
+                      ? AssetImage(ImagesPaths.placeholder) as ImageProvider
                       : NetworkImage(user.profileImageUrl!),
                 ),
                 HorizontalSpace(16.w),
@@ -81,7 +85,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        user.name ?? "????",
+                        user.name,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
@@ -103,27 +107,50 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
           ),
           VerticalSpace(6.h),
-          Text(
-            user.bio,
-            style: TextStyle(fontSize: 14.sp),
-          ),
+
+          /// ===== BIO =====
+          Text(user.bio ?? "", style: TextStyle(fontSize: 14.sp)),
+          VerticalSpace(8.h),
+
+          /// ===== EDIT BUTTON =====
           CustomButton(
             onPressed: () {},
             color: Colors.grey,
             child: Text(Strings.editProfile),
           ),
+
           Divider(thickness: 1.h),
+
+          /// ===== POSTS GRID =====
           Expanded(
-            child: GridView.builder(
-              itemCount: 10,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 2.w,
-                mainAxisSpacing: 2.h,
-                childAspectRatio: 4 / 5,
-              ),
-              itemBuilder: (context, index) {
-                return Image.asset(ImagesPaths.placeholder, fit: BoxFit.cover);
+            child: FutureBuilder(
+              future: _controller.getUserPost(userId: widget.userId),
+              builder: (context, asyncSnapshot) {
+                return GridView.builder(
+                  itemCount: asyncSnapshot.data?.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 2.w,
+                    mainAxisSpacing: 2.h,
+                    childAspectRatio: 4 / 5,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (asyncSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (asyncSnapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${asyncSnapshot.error}'),
+                      );
+                    } else if (!asyncSnapshot.hasData ||
+                        asyncSnapshot.data == null) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else {
+                      var data = asyncSnapshot.data!;
+                      return Image.network(data[index].imageUrl,fit: BoxFit.fill,);
+                    }
+                  },
+                );
               },
             ),
           ),
