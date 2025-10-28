@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/controllers/posts_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
-import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/screens/home/widgets/post_tab_header.dart';
 import 'package:insta/screens/home/widgets/post_widget.dart';
 

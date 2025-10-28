@@ -99,13 +99,25 @@ class _ProfileTabState extends State<ProfileTab> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 45.r,
-                  backgroundImage:
-                      (user.profileImageUrl == null ||
-                          user.profileImageUrl!.isEmpty)
-                      ? AssetImage(ImagesPaths.placeholder) as ImageProvider
-                      : NetworkImage(user.profileImageUrl!),
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 45.r,
+                      backgroundImage:
+                          (user.profileImageUrl == null ||
+                              user.profileImageUrl!.isEmpty)
+                          ? AssetImage(ImagesPaths.placeholder) as ImageProvider
+                          : NetworkImage(user.profileImageUrl!),
+                    ),
+                    Positioned(
+                      bottom: -15,
+                      right: -15,
+                      child: IconButton(
+                        onPressed: () => _controller.goToAddNewScreen(context),
+                        icon: Icon(Icons.add),
+                      ),
+                    ),
+                  ],
                 ),
                 HorizontalSpace(16.w),
                 Expanded(
@@ -124,13 +136,21 @@ class _ProfileTabState extends State<ProfileTab> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           FutureBuilder(
-                            future: _controller.getUserPostsCount(uid:  widget.userId),
+                            future: _controller.getUserPostsCount(
+                              uid: widget.userId,
+                            ),
                             builder: (context, asyncSnapshot) {
-                              if(asyncSnapshot.connectionState == ConnectionState.waiting){
+                              if (asyncSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return CircularProgressIndicator();
                               }
-                              return StatsInfo(number: asyncSnapshot.hasData ? asyncSnapshot.data!.toString() :"", label: Strings.posts);
-                            }
+                              return StatsInfo(
+                                number: asyncSnapshot.hasData
+                                    ? asyncSnapshot.data!.toString()
+                                    : "",
+                                label: Strings.posts,
+                              );
+                            },
                           ),
                           StatsInfo(
                             number: user.followers.length.toString(),
@@ -168,12 +188,10 @@ class _ProfileTabState extends State<ProfileTab> {
                 getColor(); // refresh color
                 getText();
                 await Provider.of<UserProvider>(
-                    context,
-                    listen: false,
-                  ).getUserData(uid: widget.userId);
-                setState(()  {
-                  
-                }); // refresh text
+                  context,
+                  listen: false,
+                ).getUserData(uid: widget.userId);
+                setState(() {}); // refresh text
               },
               color: color ?? Colors.grey,
               child: Text(text),

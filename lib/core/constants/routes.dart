@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insta/screens/add_story_screen.dart';
 import 'package:insta/screens/comments_screen.dart';
 import 'package:insta/screens/home/home_screen.dart';
 import 'package:insta/screens/login_screen.dart';
@@ -10,6 +11,7 @@ class Routes {
     RoutesNames.signup: (context) => SignupScreen(),
     RoutesNames.home: (context) => HomeScreen(),
     RoutesNames.comments: (context) => CommentsScreen(),
+    RoutesNames.addNewStory: (context) => AddStoryScreen(),
   };
 }
 
@@ -20,4 +22,5 @@ class RoutesNames {
   static const String signup = '/signup';
   static const String home = '/home';
   static const String comments = '/comments';
+  static const String addNewStory = '/addNewStory';
 }

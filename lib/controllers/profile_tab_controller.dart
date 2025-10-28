@@ -76,7 +76,7 @@ class ProfileTabController {
     }
   }
 
-  Future<Color> handelColor(String userId)  async {
+  Future<Color> handelColor(String userId) async {
     bool re = await _isFollowing(userId);
     if (re) {
       return ColorsManager.grey;
@@ -84,6 +84,7 @@ class ProfileTabController {
       return ColorsManager.red;
     }
   }
+
   Future<String> handelTextFollowUnfollow(String userId) async {
     bool re = await _isFollowing(userId);
     if (!re) {
@@ -92,7 +93,12 @@ class ProfileTabController {
       return "unfollow";
     }
   }
-  Future<int> getUserPostsCount({String? uid}) async{
+
+  Future<int> getUserPostsCount({String? uid}) async {
     return await _firebaseStoreMethods.getUserPostsCount(uid: uid);
+  }
+
+  void goToAddNewScreen(BuildContext context) {
+    Navigator.pushNamed(context, RoutesNames.addNewStory);
   }
 }
