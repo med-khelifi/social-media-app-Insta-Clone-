@@ -53,6 +53,7 @@ class _SearchTabState extends State<SearchTab> {
               if (asyncSnapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               } else if (asyncSnapshot.hasError) {
+               // print("error: ${asyncSnapshot.error}");
                 return Center(child: Text("error: ${asyncSnapshot.error}"));
               } else if (!asyncSnapshot.hasData) {
                 return Center(child: Text("error: no data fetched"));

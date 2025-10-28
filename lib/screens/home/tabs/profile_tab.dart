@@ -21,6 +21,28 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   late ProfileTabController _controller;
 
+  String text = "";
+  Color? color = Colors.grey;
+
+  /// ===== FETCH BUTTON COLOR =====
+  void getColor() async {
+    if (widget.userId == null) return;
+    final newColor = await _controller.handelColor(widget.userId!);
+    setState(() {
+      color = newColor;
+    });
+  }
+
+  /// ===== FETCH BUTTON TEXT =====
+  void getText() async {
+    if (widget.userId == null) return;
+    final newText = await _controller.handelTextFollowUnfollow(widget.userId!);
+    setState(() {
+      text = newText;
+    });
+  }
+
+  /// ===== INIT STATE =====
   @override
   void initState() {
     super.initState();
@@ -31,9 +53,14 @@ class _ProfileTabState extends State<ProfileTab> {
         context,
         listen: false,
       ).getUserData(uid: widget.userId);
+
+      // Load initial follow/unfollow state
+      getColor();
+      getText();
     });
   }
 
+  /// ===== BUILD UI =====
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -57,10 +84,11 @@ class _ProfileTabState extends State<ProfileTab> {
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
-              IconButton(
-                icon: Icon(Icons.logout, size: 24.sp),
-                onPressed: () => _controller.onSignOutPressed(context),
-              ),
+              if (widget.userId == null)
+                IconButton(
+                  icon: Icon(Icons.logout, size: 24.sp),
+                  onPressed: () => _controller.onSignOutPressed(context),
+                ),
             ],
           ),
           VerticalSpace(10.h),
@@ -95,9 +123,23 @@ class _ProfileTabState extends State<ProfileTab> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          StatsInfo(number: "100", label: Strings.posts),
-                          StatsInfo(number: "200", label: Strings.followers),
-                          StatsInfo(number: "120", label: Strings.following),
+                          FutureBuilder(
+                            future: _controller.getUserPostsCount(uid:  widget.userId),
+                            builder: (context, asyncSnapshot) {
+                              if(asyncSnapshot.connectionState == ConnectionState.waiting){
+                                return CircularProgressIndicator();
+                              }
+                              return StatsInfo(number: asyncSnapshot.hasData ? asyncSnapshot.data!.toString() :"", label: Strings.posts);
+                            }
+                          ),
+                          StatsInfo(
+                            number: user.followers.length.toString(),
+                            label: Strings.followers,
+                          ),
+                          StatsInfo(
+                            number: user.following.length.toString(),
+                            label: Strings.following,
+                          ),
                         ],
                       ),
                     ],
@@ -109,15 +151,33 @@ class _ProfileTabState extends State<ProfileTab> {
           VerticalSpace(6.h),
 
           /// ===== BIO =====
-          Text(user.bio ?? "", style: TextStyle(fontSize: 14.sp)),
+          Text(user.bio, style: TextStyle(fontSize: 14.sp)),
           VerticalSpace(8.h),
 
-          /// ===== EDIT BUTTON =====
-          CustomButton(
-            onPressed: () {},
-            color: Colors.grey,
-            child: Text(Strings.editProfile),
-          ),
+          /// ===== EDIT / FOLLOW BUTTON =====
+          if (widget.userId == null)
+            CustomButton(
+              onPressed: () {},
+              color: Colors.grey,
+              child: Text(Strings.editProfile),
+            )
+          else
+            CustomButton(
+              onPressed: () async {
+                _controller.handleFollowing(widget.userId!);
+                getColor(); // refresh color
+                getText();
+                await Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  ).getUserData(uid: widget.userId);
+                setState(()  {
+                  
+                }); // refresh text
+              },
+              color: color ?? Colors.grey,
+              child: Text(text),
+            ),
 
           Divider(thickness: 1.h),
 
@@ -126,31 +186,31 @@ class _ProfileTabState extends State<ProfileTab> {
             child: FutureBuilder(
               future: _controller.getUserPost(userId: widget.userId),
               builder: (context, asyncSnapshot) {
-                return GridView.builder(
-                  itemCount: asyncSnapshot.data?.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 2.w,
-                    mainAxisSpacing: 2.h,
-                    childAspectRatio: 4 / 5,
-                  ),
-                  itemBuilder: (context, index) {
-                    if (asyncSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (asyncSnapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${asyncSnapshot.error}'),
+                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (asyncSnapshot.hasError) {
+                  return Center(child: Text('Error: ${asyncSnapshot.error}'));
+                } else if (!asyncSnapshot.hasData ||
+                    asyncSnapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  final data = asyncSnapshot.data!;
+                  return GridView.builder(
+                    itemCount: data.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 2.w,
+                      mainAxisSpacing: 2.h,
+                      childAspectRatio: 4 / 5,
+                    ),
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        data[index].imageUrl,
+                        fit: BoxFit.fill,
                       );
-                    } else if (!asyncSnapshot.hasData ||
-                        asyncSnapshot.data == null) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else {
-                      var data = asyncSnapshot.data!;
-                      return Image.network(data[index].imageUrl,fit: BoxFit.fill,);
-                    }
-                  },
-                );
+                    },
+                  );
+                }
               },
             ),
           ),

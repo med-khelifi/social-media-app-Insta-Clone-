@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
@@ -7,7 +8,8 @@ import 'package:insta/core/models/post.dart';
 
 class ProfileTabController {
   late FirebaseStoreMethods _firebaseStoreMethods;
-  ProfileTabController(){
+  bool isFollowingThisUser = false;
+  ProfileTabController() {
     _firebaseStoreMethods = FirebaseStoreMethods();
   }
   void init() {}
@@ -49,7 +51,48 @@ class ProfileTabController {
     }
   }
 
-  Future<List<PostModel>> getUserPost({String? userId}){
+  Future<List<PostModel>> getUserPost({String? userId}) {
     return _firebaseStoreMethods.getUserPosts(uid: userId);
+  }
+
+  Future<void> _followUser(String userId) async {
+    await _firebaseStoreMethods.followUser(userId);
+  }
+
+  Future<void> _unfollowUser(String userId) async {
+    await _firebaseStoreMethods.unfollowUser(userId);
+  }
+
+  Future<bool> _isFollowing(String userId) async {
+    return await _firebaseStoreMethods.isFollowing(userId);
+  }
+
+  void handleFollowing(String userId) async {
+    bool re = await _isFollowing(userId);
+    if (re) {
+      await _unfollowUser(userId);
+    } else {
+      await _followUser(userId);
+    }
+  }
+
+  Future<Color> handelColor(String userId)  async {
+    bool re = await _isFollowing(userId);
+    if (re) {
+      return ColorsManager.grey;
+    } else {
+      return ColorsManager.red;
+    }
+  }
+  Future<String> handelTextFollowUnfollow(String userId) async {
+    bool re = await _isFollowing(userId);
+    if (!re) {
+      return "follow";
+    } else {
+      return "unfollow";
+    }
+  }
+  Future<int> getUserPostsCount({String? uid}) async{
+    return await _firebaseStoreMethods.getUserPostsCount(uid: uid);
   }
 }

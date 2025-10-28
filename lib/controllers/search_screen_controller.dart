@@ -8,11 +8,13 @@ class SearchScreenController {
   SearchScreenController() {
     _firebaseStoreMethods = FirebaseStoreMethods();
     searchBoxEditingController = TextEditingController();
+    searchBoxEditingController.clear();
   }
   late FirebaseStoreMethods _firebaseStoreMethods;
   late TextEditingController searchBoxEditingController;
 
   Stream<List<UserModel>> getSearchedUsers() {
+    if (searchBoxEditingController.text.isEmpty) return Stream.value(List.empty());
     return _firebaseStoreMethods.getSearchedUserData(
       searchBoxEditingController.text.trim(),
     );
