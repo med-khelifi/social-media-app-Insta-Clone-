@@ -11,6 +11,12 @@ class Util {
       if (image == null) return null;    
       return File(image.path);
   }
+  static Future<File?> takeVideo(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+      final XFile? video = await picker.pickVideo(source: source);
+      if (video == null) return null;    
+      return File(video.path);
+  }
 
   static void showSnackBar(String message, {required BuildContext context}) {
     ScaffoldMessenger.of(context).showSnackBar(
