@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/firebase/firebase_auth_settings.dart';
+import 'package:insta/core/firebase/firebase_store_methods.dart';
+import 'package:insta/core/supabase/supabase_storage_service.dart';
 import 'package:insta/core/util/util.dart';
 import 'package:video_player/video_player.dart';
 
@@ -13,14 +16,18 @@ class AddNewStoryScreenController {
   late StreamController<(bool, dynamic)?> _fileStreamController;
   late Stream<(bool, dynamic)?> _fileStream;
   get fileStream => _fileStream;
-
   late Sink<(bool, dynamic)?> _fileSink;
+
+  late FirebaseStoreMethods _firebaseStoreMethods;
+  late SupabaseStorageService _storageService;
 
   AddNewStoryScreenController() {
     isImage = null;
     _fileStreamController = StreamController();
     _fileSink = _fileStreamController.sink;
     _fileStream = _fileStreamController.stream.asBroadcastStream();
+    _firebaseStoreMethods = FirebaseStoreMethods();
+    _storageService = SupabaseStorageService();
   }
 
   Future<bool?> _showSelectMediaDialog(BuildContext context) async {
@@ -85,6 +92,28 @@ class AddNewStoryScreenController {
       videoController.play();
       _fileSink.add((false, videoController));
     }
+  }
+
+  Future<void> uploadStory(BuildContext context, {String? caption}) async {
+    if (file == null) return;
+
+    String? fileUrl = await _storageService.uploadStoryFile(
+      file: file!,
+      isImage: isImage!,
+      userId: FirebaseAuthSettings.currentUserId,
+    );
+    if (fileUrl == null) {
+      // ignore: use_build_context_synchronously
+      Util.showSnackBar("Error uploading file", context: context);
+      return;
+    }
+
+    await _firebaseStoreMethods.uploadStory(
+      isImage: isImage ?? false,
+      fileUrl: fileUrl,
+    );
+    // ignore: use_build_context_synchronously
+    Util.showSnackBar("Uploaded", context: context);
   }
 
   void dispose() {

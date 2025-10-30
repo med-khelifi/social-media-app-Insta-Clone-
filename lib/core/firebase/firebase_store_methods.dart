@@ -3,7 +3,9 @@ import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/core/models/comment.dart';
 import 'package:insta/core/models/post.dart';
+import 'package:insta/core/models/story.dart';
 import 'package:insta/core/models/user.dart';
+import 'package:uuid/uuid.dart';
 
 class FirebaseStoreMethods {
   Future<UserModel> getCurrentUserData({String? uid}) async {
@@ -32,18 +34,18 @@ class FirebaseStoreMethods {
   }
 
   Stream<List<UserModel>> getSearchedUserData(String userName) {
-  return FirebaseFirestore.instance
-      .collection(FirebaseSettings.usersCollection)
-      .where("username", isGreaterThanOrEqualTo: userName)
-      .where("username", isLessThan: '${userName}z')
-      .snapshots()
-      .map(
-        (snapshot) => snapshot.docs
-            .map((e) => UserModel.fromDocument(e))
-            .where((user) => user.uid != FirebaseAuthSettings.currentUserId)
-            .toList(),
-      );
-}
+    return FirebaseFirestore.instance
+        .collection(FirebaseSettings.usersCollection)
+        .where("username", isGreaterThanOrEqualTo: userName)
+        .where("username", isLessThan: '${userName}z')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((e) => UserModel.fromDocument(e))
+              .where((user) => user.uid != FirebaseAuthSettings.currentUserId)
+              .toList(),
+        );
+  }
 
   void addPost(PostModel post) async {
     await FirebaseFirestore.instance
@@ -169,6 +171,7 @@ class FirebaseStoreMethods {
         (userDoc.data() as Map<String, dynamic>)['following'] ?? [];
     return following.contains(uid);
   }
+
   Future<int> getUserPostsCount({String? uid}) async {
     var userId = uid ?? FirebaseAuthSettings.currentUserId;
     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
@@ -178,5 +181,23 @@ class FirebaseStoreMethods {
         .get();
 
     return snapshot.docs.length;
+  }
+
+  Future<void> uploadStory({
+    required bool isImage,
+    required String fileUrl,
+  }) async {
+    final story = StoryModel(
+      id: Uuid().v4(),
+      userId: FirebaseAuthSettings.currentUserId,
+      imageUrl: fileUrl,
+      createdAt: DateTime.now(),
+      isVideo: !isImage,
+    );
+
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.storiesCollection)
+        .doc(story.id)
+        .set(story.toMap());
   }
 }

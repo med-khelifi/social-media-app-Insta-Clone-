@@ -41,8 +41,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextButton(
-              onPressed: () {
-              },
+              onPressed: () => _controller.uploadStory(context),
               child: Text(
                 "Add",
                 style: TextStyle(color: ColorsManager.blue, fontSize: 16),

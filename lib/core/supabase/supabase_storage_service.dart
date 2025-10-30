@@ -52,4 +52,28 @@ class SupabaseStorageService {
       return (true, e.toString());
     }
   }
+
+  Future<String?> uploadStoryFile({
+    required File file,
+    required bool isImage,
+    required String userId,
+  }) async {
+    try {
+      final ext = file.path.split('.').last;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final filePath = '$userId/$fileName';
+
+      await _client.storage
+          .from(SupabaseSettings.storiesImagesBucketName)
+          .upload(filePath, file);
+
+      final publicUrl = _client.storage
+          .from(SupabaseSettings.storiesImagesBucketName)
+          .getPublicUrl(filePath);
+      return publicUrl;
+    } catch (e) {
+      debugPrint('❌ Upload story failed: $e');
+      return null;
+    }
+  }
 }
