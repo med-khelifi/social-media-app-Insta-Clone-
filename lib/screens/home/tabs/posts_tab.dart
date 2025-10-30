@@ -4,6 +4,7 @@ import 'package:insta/controllers/posts_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/screens/home/widgets/post_tab_header.dart';
 import 'package:insta/screens/home/widgets/post_widget.dart';
+import 'package:insta/screens/home/widgets/stories_seaction.dart';
 
 class PostsTab extends StatefulWidget {
   const PostsTab({super.key});
@@ -26,6 +27,7 @@ class _PostsTabState extends State<PostsTab> {
       child: Column(
         children: [
           PostTabHeader(),
+          StoriesSections(),
           VerticalSpace(10.h),
           StreamBuilder(
             stream: _controller.postsStream,

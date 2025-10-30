@@ -4,6 +4,7 @@ import 'package:insta/screens/comments_screen.dart';
 import 'package:insta/screens/home/home_screen.dart';
 import 'package:insta/screens/login_screen.dart';
 import 'package:insta/screens/signup_screen.dart';
+import 'package:insta/screens/story_view_screen.dart';
 
 class Routes {
   static Map<String, WidgetBuilder> routes = {
@@ -12,6 +13,7 @@ class Routes {
     RoutesNames.home: (context) => HomeScreen(),
     RoutesNames.comments: (context) => CommentsScreen(),
     RoutesNames.addNewStory: (context) => AddStoryScreen(),
+    RoutesNames.storyView: (context) => StoryViewScreen(),
   };
 }
 
@@ -23,4 +25,5 @@ class RoutesNames {
   static const String home = '/home';
   static const String comments = '/comments';
   static const String addNewStory = '/addNewStory';
+  static const String storyView = '/storyView';
 }

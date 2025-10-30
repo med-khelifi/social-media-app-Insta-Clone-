@@ -40,7 +40,7 @@ class _AddNewPostTabState extends State<AddNewPostTab> {
               TextButton(
                 onPressed: () => _controller.handlePostUpload(context),
                 child: Text(
-                  Strings.next,
+                  Strings.post,
                   style: TextStyle(
                     fontSize: 16.sp,
                     color: ColorsManager.blue,

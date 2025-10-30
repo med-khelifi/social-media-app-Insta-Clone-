@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:insta/controllers/add_new_story_screen_controller.dart';
 import 'package:insta/core/constants/colors.dart';
@@ -43,7 +42,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextButton(
               onPressed: () {
-                // TODO: Add upload story logic
               },
               child: Text(
                 "Add",
