@@ -27,16 +27,18 @@ class _AddNewPostTabState extends State<AddNewPostTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
+              Spacer(),
+              // IconButton(
+              //   icon: Icon(Icons.arrow_back),
+              //   onPressed: () {
+              //     Navigator.pop(context);
+              //   },
+              // ),
               Text(
                 Strings.addNewPost,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              Spacer(),
               TextButton(
                 onPressed: () => _controller.handlePostUpload(context),
                 child: Text(
