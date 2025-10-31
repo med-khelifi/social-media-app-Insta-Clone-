@@ -186,13 +186,15 @@ class FirebaseStoreMethods {
   Future<void> uploadStory({
     required bool isImage,
     required String fileUrl,
+    required String imageUrl,
   }) async {
     final story = StoryModel(
       id: Uuid().v4(),
       userId: FirebaseAuthSettings.currentUserId,
-      imageUrl: fileUrl,
+      imageUrl: imageUrl,
       createdAt: DateTime.now(),
       isVideo: !isImage,
+      contentUrl: fileUrl,
     );
 
     await FirebaseFirestore.instance
@@ -200,4 +202,59 @@ class FirebaseStoreMethods {
         .doc(story.id)
         .set(story.toMap());
   }
+Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() async* {
+  final String currentUserId = FirebaseAuthSettings.currentUserId;
+
+  // 1️⃣ جلب قائمة المتابعين + المستخدم الحالي
+  final userDoc = await FirebaseFirestore.instance
+      .collection(FirebaseSettings.usersCollection)
+      .doc(currentUserId)
+      .get();
+
+  List<String> followings = List<String>.from(userDoc.data()?['followings'] ?? []);
+  followings.add(currentUserId);
+
+  // 2️⃣ Stream على القصص
+  yield* FirebaseFirestore.instance
+      .collection(FirebaseSettings.storiesCollection)
+      .where('userId', whereIn: followings)
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .asyncMap((snapshot) async {
+        final stories = snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
+
+        // 3️⃣ جلب بيانات المستخدمين المشاركين
+        Map<String, Map<String, dynamic>> usersDataMap = {};
+        for (var userId in followings) {
+          final doc = await FirebaseFirestore.instance
+              .collection(FirebaseSettings.usersCollection)
+              .doc(userId)
+              .get();
+          usersDataMap[userId] = doc.data() ?? {};
+        }
+
+        // 4️⃣ إنشاء الخريطة userId -> List<StoryModel>
+        Map<String, List<StoryModel>> result = {};
+        for (var story in stories) {
+          result[story.userId] ??= [];
+          result[story.userId]!.add(story);
+        }
+
+        // 5️⃣ ترتيب بحيث current user يكون الأول
+        final sortedKeys = result.keys.toList()
+          ..sort((a, b) {
+            if (a == currentUserId) return -1;
+            if (b == currentUserId) return 1;
+            return 0;
+          });
+
+        Map<String, List<StoryModel>> sortedResult = {};
+        for (var key in sortedKeys) {
+          sortedResult[key] = result[key]!;
+        }
+
+        return sortedResult;
+      });
+}
+
 }

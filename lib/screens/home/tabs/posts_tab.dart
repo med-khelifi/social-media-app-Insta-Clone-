@@ -27,7 +27,10 @@ class _PostsTabState extends State<PostsTab> {
       child: Column(
         children: [
           PostTabHeader(),
-          StoriesSections(),
+          StoriesSections(
+            storiesStream: _controller
+                .getStoriesForCurrentUserAndFollowingsStream(),
+          ),
           VerticalSpace(10.h),
           StreamBuilder(
             stream: _controller.postsStream,

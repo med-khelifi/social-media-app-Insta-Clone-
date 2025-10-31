@@ -2,6 +2,7 @@ class StoryModel {
   final String id;
   final String userId;
   final String imageUrl;
+  final String contentUrl;
   final DateTime createdAt;
   final List<String> viewers;
   final bool isVideo;
@@ -10,6 +11,7 @@ class StoryModel {
     required this.id,
     required this.userId,
     required this.imageUrl,
+    required this.contentUrl,
     required this.createdAt,
     this.viewers = const [],
     this.isVideo = false,
@@ -20,6 +22,7 @@ class StoryModel {
       'id': id,
       'userId': userId,
       'imageUrl': imageUrl,
+      'contentUrl': contentUrl,
       'createdAt': createdAt.toIso8601String(),
       'viewers': viewers,
       'isVideo': isVideo,
@@ -31,6 +34,7 @@ class StoryModel {
       id: map['id'] ?? '',
       userId: map['userId'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+      contentUrl: map['contentUrl'] ?? '',
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
       viewers: List<String>.from(map['viewers'] ?? []),
       isVideo: map['isVideo'] ?? false,

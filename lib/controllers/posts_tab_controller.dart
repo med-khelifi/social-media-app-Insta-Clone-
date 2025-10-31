@@ -6,6 +6,7 @@ import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/models/post.dart';
+import 'package:insta/core/models/story.dart';
 import 'package:insta/core/supabase/supabase_storage_service.dart';
 import 'package:insta/core/util/util.dart';
 
@@ -66,5 +67,9 @@ class PostsTabController {
     if (context.mounted) {
       Util.showSnackBar(Strings.postDeleted, context: context);
     }
+  }
+
+  Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() {
+    return _firebaseStoreMethods.getStoriesForCurrentUserAndFollowingsStream();
   }
 }

@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:insta/core/constants/strings.dart';
 import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
+import 'package:insta/core/provider/user_provider.dart';
 import 'package:insta/core/supabase/supabase_storage_service.dart';
 import 'package:insta/core/util/util.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class AddNewStoryScreenController {
@@ -96,7 +98,9 @@ class AddNewStoryScreenController {
 
   Future<void> uploadStory(BuildContext context, {String? caption}) async {
     if (file == null) return;
-
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.getUser;
+    if (user == null) return;
     String? fileUrl = await _storageService.uploadStoryFile(
       file: file!,
       isImage: isImage!,
@@ -109,11 +113,13 @@ class AddNewStoryScreenController {
     }
 
     await _firebaseStoreMethods.uploadStory(
-      isImage: isImage ?? false,
+      isImage: isImage ?? true,
       fileUrl: fileUrl,
+      imageUrl: user.profileImageUrl ?? '',
     );
     // ignore: use_build_context_synchronously
     Util.showSnackBar("Uploaded", context: context);
+    _fileSink.add(null);
   }
 
   void dispose() {
