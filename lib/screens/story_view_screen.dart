@@ -49,7 +49,7 @@ class _StoryViewScreenState extends State<StoryViewScreen> {
           controller: _controller.storyController,
           repeat: false,
           onComplete: () {
-            Navigator.pop(context); // ترجع تلقائياً بعد انتهاء الستوري
+            Navigator.pop(context); 
           },
           onVerticalSwipeComplete: (direction) {
             if (direction == Direction.down) Navigator.pop(context);

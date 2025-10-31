@@ -8,14 +8,13 @@ import 'package:insta/core/models/post.dart';
 
 class ProfileTabController {
   late FirebaseStoreMethods _firebaseStoreMethods;
-  bool isFollowingThisUser = false;
   ProfileTabController() {
     _firebaseStoreMethods = FirebaseStoreMethods();
   }
   void init() {}
   void dispose() {}
 
-  void onSignOutPressed(BuildContext context) async {
+  Future<void> onSignOutPressed(BuildContext context) async {
     final bool? res = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -39,14 +38,11 @@ class ProfileTabController {
     if (res == true) {
       try {
         await FirebaseAuth.instance.signOut();
-        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, RoutesNames.login);
       } catch (error) {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(
-          // ignore: use_build_context_synchronously
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error signing out: $error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: $error')),
+        );
       }
     }
   }
@@ -67,30 +63,38 @@ class ProfileTabController {
     return await _firebaseStoreMethods.isFollowing(userId);
   }
 
-  void handleFollowing(String userId) async {
-    bool re = await _isFollowing(userId);
-    if (re) {
-      await _unfollowUser(userId);
-    } else {
-      await _followUser(userId);
+  /// <- الآن ترجع Future<bool> (true => now following, false => now not following)
+  Future<bool> handleFollowing(String userId) async {
+    try {
+      final currentlyFollowing = await _isFollowing(userId);
+      if (currentlyFollowing) {
+        await _unfollowUser(userId);
+        return false;
+      } else {
+        await _followUser(userId);
+        return true;
+      }
+    } catch (e) {
+      // يمكنك هنا تسجيل الخطأ أو إعادة رميه حسب الحاجة
+      rethrow;
     }
   }
 
   Future<Color> handelColor(String userId) async {
-    bool re = await _isFollowing(userId);
-    if (re) {
+    try {
+      bool re = await _isFollowing(userId);
+      return re ? ColorsManager.grey : ColorsManager.red;
+    } catch (_) {
       return ColorsManager.grey;
-    } else {
-      return ColorsManager.red;
     }
   }
 
   Future<String> handelTextFollowUnfollow(String userId) async {
-    bool re = await _isFollowing(userId);
-    if (!re) {
+    try {
+      bool re = await _isFollowing(userId);
+      return re ? "unfollow" : "follow";
+    } catch (_) {
       return "follow";
-    } else {
-      return "unfollow";
     }
   }
 

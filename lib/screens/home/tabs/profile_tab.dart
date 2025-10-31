@@ -25,24 +25,25 @@ class _ProfileTabState extends State<ProfileTab> {
   Color? color = Colors.grey;
 
   /// ===== FETCH BUTTON COLOR =====
-  void getColor() async {
+  Future<void> getColor() async {
     if (widget.userId == null) return;
     final newColor = await _controller.handelColor(widget.userId!);
+    if (!mounted) return;
     setState(() {
       color = newColor;
     });
   }
 
   /// ===== FETCH BUTTON TEXT =====
-  void getText() async {
+  Future<void> getText() async {
     if (widget.userId == null) return;
     final newText = await _controller.handelTextFollowUnfollow(widget.userId!);
+    if (!mounted) return;
     setState(() {
       text = newText;
     });
   }
 
-  /// ===== INIT STATE =====
   @override
   void initState() {
     super.initState();
@@ -54,13 +55,21 @@ class _ProfileTabState extends State<ProfileTab> {
         listen: false,
       ).getUserData(uid: widget.userId);
 
-      // Load initial follow/unfollow state
-      getColor();
-      getText();
+      // Load initial follow/unfollow state (only if viewing another user)
+      if (widget.userId != null) {
+        await getColor();
+        await getText();
+      } else {
+        // current user: show Edit profile text and grey button (or hide it)
+        if (!mounted) return;
+        setState(() {
+          text = Strings.editProfile; // أو "Edit profile"
+          color = Colors.grey;
+        });
+      }
     });
   }
 
-  /// ===== BUILD UI =====
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -106,17 +115,19 @@ class _ProfileTabState extends State<ProfileTab> {
                       backgroundImage:
                           (user.profileImageUrl == null ||
                               user.profileImageUrl!.isEmpty)
-                          ? AssetImage(ImagesPaths.placeholder) as ImageProvider
-                          : NetworkImage(user.profileImageUrl!),
+                              ? AssetImage(ImagesPaths.placeholder)
+                              : NetworkImage(user.profileImageUrl!) as ImageProvider,
                     ),
-                    Positioned(
-                      bottom: -15,
-                      right: -15,
-                      child: IconButton(
-                        onPressed: () => _controller.goToAddNewScreen(context),
-                        icon: Icon(Icons.add),
+                    // show add-story button only if current user
+                    if (widget.userId == null)
+                      Positioned(
+                        bottom: -15,
+                        right: -15,
+                        child: IconButton(
+                          onPressed: () => _controller.goToAddNewScreen(context),
+                          icon: Icon(Icons.add),
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 HorizontalSpace(16.w),
@@ -177,21 +188,36 @@ class _ProfileTabState extends State<ProfileTab> {
           /// ===== EDIT / FOLLOW BUTTON =====
           if (widget.userId == null)
             CustomButton(
-              onPressed: () {},
+              onPressed: () {
+                // navigate to edit profile screen or whatever
+              },
               color: Colors.grey,
               child: Text(Strings.editProfile),
             )
           else
             CustomButton(
               onPressed: () async {
-                _controller.handleFollowing(widget.userId!);
-                getColor(); // refresh color
-                getText();
-                await Provider.of<UserProvider>(
-                  context,
-                  listen: false,
-                ).getUserData(uid: widget.userId);
-                setState(() {}); // refresh text
+                try {
+                  // wait for follow/unfollow to finish
+                  await _controller.handleFollowing(widget.userId!);
+
+                  // refresh local UI (color, text and provider data)
+                  await getColor();
+                  await getText();
+
+                  await Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  ).getUserData(uid: widget.userId);
+
+                  if (mounted) setState(() {});
+                } catch (e) {
+                  // show error
+                  if (mounted) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('Error: $e')));
+                  }
+                }
               },
               color: color ?? Colors.grey,
               child: Text(text),
