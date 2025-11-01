@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:insta/app/insta.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/supabase/supabase_credential.dart';
 import 'firebase_options.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,6 +13,7 @@ void main() async {
     url: SupabaseCredential.url,
     anonKey: SupabaseCredential.anonKey,
   );
+  await FirebaseStoreMethods().deleteExpiredStories();
 
   runApp(Insta());
 }
