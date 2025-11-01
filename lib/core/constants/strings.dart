@@ -36,5 +36,5 @@ class Strings {
 
   static const String postDeleted = "Post deleted";
 
-  static String sendMessage = "message";
+  static const String sendMessage = "message";
 }

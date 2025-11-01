@@ -9,15 +9,48 @@ import 'package:insta/core/models/user.dart';
 import 'package:uuid/uuid.dart';
 
 class FirebaseStoreMethods {
+
   Future<UserModel> getCurrentUserData({String? uid}) async {
-    DocumentSnapshot<Map<String, dynamic>> user = await FirebaseFirestore
-        .instance
+    final currentUserId = FirebaseAuthSettings.currentUserId;
+    final targetUserId = uid ?? currentUserId;
+
+    // 1. جلب بيانات المستخدم المستهدف
+    final userDoc = await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
-        .doc(uid ?? FirebaseAuthSettings.currentUserId)
+        .doc(targetUserId)
         .get();
 
-    UserModel? userModel = UserModel.fromDocument(user);
-    return userModel;
+    if (!userDoc.exists) throw Exception("User not found");
+
+    final data = userDoc.data()!;
+
+    // بناء الكائن الأساسي
+    UserModel user = UserModel(
+      uid: targetUserId,
+      username: data['username'] ?? '',
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      bio: data['bio'] ?? '',
+      profileImageUrl: data['profileImageUrl'],
+      followers: List<String>.from(data['followers'] ?? []),
+      following: List<String>.from(data['following'] ?? []),
+      postsCount: data['postsCount'] ?? 0,
+    );
+
+    // 2. لو مش المستخدم الحالي → نحسب isFollowing
+    if (uid != null) {
+      final currentUserDoc = await FirebaseFirestore.instance
+          .collection(FirebaseSettings.usersCollection)
+          .doc(currentUserId)
+          .get();
+
+      final followingList = List<String>.from(currentUserDoc['following'] ?? []);
+      final isFollowing = followingList.contains(targetUserId);
+
+      user = user.copyWith(isFollowing: isFollowing);
+    }
+
+    return user;
   }
 
   Future<List<PostModel>> getUserPosts({String? uid}) async {
@@ -28,10 +61,7 @@ class FirebaseStoreMethods {
         .where("userId", isEqualTo: userId)
         .get();
 
-    List<PostModel> posts = snapshot.docs
-        .map((e) => PostModel.fromJson(e.data()))
-        .toList();
-    return posts;
+    return snapshot.docs.map((e) => PostModel.fromJson(e.data())).toList();
   }
 
   Stream<List<UserModel>> getSearchedUserData(String userName) {
@@ -48,11 +78,18 @@ class FirebaseStoreMethods {
         );
   }
 
-  void addPost(PostModel post) async {
-    await FirebaseFirestore.instance
+  // إضافة منشور + زيادة postsCount
+  Future<void> addPost(PostModel post) async {
+    final postRef = FirebaseFirestore.instance
         .collection(FirebaseSettings.postsCollection)
-        .doc(post.id)
-        .set(post.toJson());
+        .doc(post.id);
+
+    await postRef.set(post.toJson());
+
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.usersCollection)
+        .doc(post.userId)
+        .update({'postsCount': FieldValue.increment(1)});
   }
 
   Future<void> togglePostLike(String postId) async {
@@ -99,24 +136,29 @@ class FirebaseStoreMethods {
     }
   }
 
+  // حذف منشور + تقليل postsCount
   Future<void> deletePost(String postId) async {
-    if (FirebaseAuthSettings.currentUserId ==
-        FirebaseAuthSettings.currentUserId) {
-      await FirebaseFirestore.instance
-          .collection(FirebaseSettings.postsCollection)
-          .doc(postId)
-          .delete();
-    }
+    final postDoc = await FirebaseFirestore.instance
+        .collection(FirebaseSettings.postsCollection)
+        .doc(postId)
+        .get();
+
+    if (!postDoc.exists) return;
+
+    final userId = postDoc['userId'] as String;
+    await postDoc.reference.delete();
+
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.usersCollection)
+        .doc(userId)
+        .update({'postsCount': FieldValue.increment(-1)});
   }
 
   Future<void> deleteComments(String commentId) async {
-    if (FirebaseAuthSettings.currentUserId ==
-        FirebaseAuthSettings.currentUserId) {
-      await FirebaseFirestore.instance
-          .collection(FirebaseSettings.commentsCollection)
-          .doc(commentId)
-          .delete();
-    }
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.commentsCollection)
+        .doc(commentId)
+        .delete();
   }
 
   Future<void> addComment(CommentModel comment) async {
@@ -131,17 +173,15 @@ class FirebaseStoreMethods {
         .collection(FirebaseSettings.usersCollection)
         .doc(uid)
         .update({
-          'followers': FieldValue.arrayUnion([
-            FirebaseAuthSettings.currentUserId,
-          ]),
-        });
+      'followers': FieldValue.arrayUnion([FirebaseAuthSettings.currentUserId]),
+    });
 
     await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
         .doc(FirebaseAuthSettings.currentUserId)
         .update({
-          'following': FieldValue.arrayUnion([uid]),
-        });
+      'following': FieldValue.arrayUnion([uid]),
+    });
   }
 
   Future<void> unfollowUser(String uid) async {
@@ -149,39 +189,26 @@ class FirebaseStoreMethods {
         .collection(FirebaseSettings.usersCollection)
         .doc(uid)
         .update({
-          'followers': FieldValue.arrayRemove([
-            FirebaseAuthSettings.currentUserId,
-          ]),
-        });
+      'followers': FieldValue.arrayRemove([FirebaseAuthSettings.currentUserId]),
+    });
 
     await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
         .doc(FirebaseAuthSettings.currentUserId)
         .update({
-          'following': FieldValue.arrayRemove([uid]),
-        });
+      'following': FieldValue.arrayRemove([uid]),
+    });
   }
 
+  // يمكن الاحتفاظ بها للاستخدامات الأخرى
   Future<bool> isFollowing(String uid) async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
         .doc(FirebaseAuthSettings.currentUserId)
         .get();
 
-    List following =
-        (userDoc.data() as Map<String, dynamic>)['following'] ?? [];
+    List following = (userDoc.data() as Map<String, dynamic>)['following'] ?? [];
     return following.contains(uid);
-  }
-
-  Future<int> getUserPostsCount({String? uid}) async {
-    var userId = uid ?? FirebaseAuthSettings.currentUserId;
-    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-        .instance
-        .collection(FirebaseSettings.postsCollection)
-        .where("userId", isEqualTo: userId)
-        .get();
-
-    return snapshot.docs.length;
   }
 
   Future<void> uploadStory({
@@ -189,10 +216,9 @@ class FirebaseStoreMethods {
     required String fileUrl,
     required String imageUrl,
     required String username,
-    
   }) async {
     final story = StoryModel(
-      id: Uuid().v4(),
+      id: const Uuid().v4(),
       userId: FirebaseAuthSettings.currentUserId,
       imageUrl: imageUrl,
       createdAt: DateTime.now(),
@@ -207,8 +233,7 @@ class FirebaseStoreMethods {
         .set(story.toMap());
   }
 
-  Stream<Map<String, List<StoryModel>>>
-  getStoriesForCurrentUserAndFollowingsStream() async* {
+  Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() async* {
     final String currentUserId = FirebaseAuthSettings.currentUserId;
 
     final userDoc = await FirebaseFirestore.instance
@@ -216,23 +241,14 @@ class FirebaseStoreMethods {
         .doc(currentUserId)
         .get();
 
-    List<String> followings = List<String>.from(
-      userDoc.data()?['following'] ?? [],
-    );
+    List<String> followings = List<String>.from(userDoc.data()?['following'] ?? []);
     followings.add(currentUserId);
 
-    // 🔹 تقسيم المتابعين إلى مجموعات من 10 IDs
     List<List<String>> chunks = [];
     for (var i = 0; i < followings.length; i += 10) {
-      chunks.add(
-        followings.sublist(
-          i,
-          i + 10 > followings.length ? followings.length : i + 10,
-        ),
-      );
+      chunks.add(followings.sublist(i, i + 10 > followings.length ? followings.length : i + 10));
     }
 
-    // 🔹 لكل مجموعة نعمل Stream
     List<Stream<QuerySnapshot<Map<String, dynamic>>>> streams = chunks
         .map(
           (chunk) => FirebaseFirestore.instance
@@ -243,11 +259,8 @@ class FirebaseStoreMethods {
         )
         .toList();
 
-    // 🔹 دمج كل Streams في Stream واحد
     yield* StreamGroup.merge(streams).asyncMap((snapshot) async {
-      final stories = snapshot.docs
-          .map((doc) => StoryModel.fromMap(doc.data()))
-          .toList();
+      final stories = snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
 
       Map<String, List<StoryModel>> result = {};
       for (var story in stories) {
@@ -255,7 +268,6 @@ class FirebaseStoreMethods {
         result[story.userId]!.add(story);
       }
 
-      // ترتيب بحيث تكون قصص المستخدم الحالي في البداية
       final sortedKeys = result.keys.toList()
         ..sort((a, b) {
           if (a == currentUserId) return -1;
@@ -272,46 +284,35 @@ class FirebaseStoreMethods {
     });
   }
 
-  /// Delete stories older than 24 hours
   Future<void> deleteExpiredStories() async {
     try {
       final now = DateTime.now();
-
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection(FirebaseSettings.storiesCollection)
           .get();
 
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-
         if (data.containsKey('createdAt')) {
           final Timestamp timestamp = data['createdAt'];
           final storyTime = timestamp.toDate();
-
-          // check if 24h passed
           if (now.difference(storyTime).inHours >= 24) {
             await doc.reference.delete();
           }
         }
       }
-      // ignore: empty_catches
     } catch (e) {}
   }
 
   Future<List<StoryModel>> getUserStories(String uid) async {
     try {
-      final QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance
-              .collection(FirebaseSettings.storiesCollection)
-              .where('userId', isEqualTo: uid)
-              .orderBy('createdAt', descending: true)
-              .get();
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+          .collection(FirebaseSettings.storiesCollection)
+          .where('userId', isEqualTo: uid)
+          .orderBy('createdAt', descending: true)
+          .get();
 
-      List<StoryModel> stories = snapshot.docs
-          .map((doc) => StoryModel.fromMap(doc.data()))
-          .toList();
-
-      return stories;
+      return snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
     } catch (e) {
       return [];
     }

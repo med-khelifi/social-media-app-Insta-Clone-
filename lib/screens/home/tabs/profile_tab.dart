@@ -18,32 +18,10 @@ class ProfileTab extends StatefulWidget {
   @override
   State<ProfileTab> createState() => _ProfileTabState();
 }
+// ... (الـ imports كما هي)
 
 class _ProfileTabState extends State<ProfileTab> {
   late ProfileTabController _controller;
-
-  String text = "";
-  Color? color = Colors.grey;
-
-  /// ===== FETCH BUTTON COLOR =====
-  Future<void> getColor() async {
-    if (widget.userId == null) return;
-    final newColor = await _controller.handelColor(widget.userId!);
-    if (!mounted) return;
-    setState(() {
-      color = newColor;
-    });
-  }
-
-  /// ===== FETCH BUTTON TEXT =====
-  Future<void> getText() async {
-    if (widget.userId == null) return;
-    final newText = await _controller.handelTextFollowUnfollow(widget.userId!);
-    if (!mounted) return;
-    setState(() {
-      text = newText;
-    });
-  }
 
   @override
   void initState() {
@@ -51,50 +29,40 @@ class _ProfileTabState extends State<ProfileTab> {
     _controller = ProfileTabController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<UserProvider>(
-        context,
-        listen: false,
-      ).getUserData(uid: widget.userId);
-
-      // Load initial follow/unfollow state (only if viewing another user)
-      if (widget.userId != null) {
-        await getColor();
-        await getText();
-      } else {
-        // current user: show Edit profile text and grey button (or hide it)
-        if (!mounted) return;
-        setState(() {
-          text = Strings.editProfile; // أو "Edit profile"
-          color = Colors.grey;
-        });
-      }
+      await Provider.of<UserProvider>(context, listen: false)
+          .getUserData(uid: widget.userId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-
     if (userProvider.getUser == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final user = userProvider.getUser!;
+    final isOwnProfile = widget.userId == null;
+
+    final buttonText = isOwnProfile
+        ? Strings.editProfile
+        : (user.isFollowing ? "unfollow" : "follow");
+
+    final buttonColor = isOwnProfile
+        ? Colors.grey
+        : (user.isFollowing ? ColorsManager.grey : ColorsManager.red);
 
     return Padding(
       padding: EdgeInsets.all(10.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ===== HEADER =====
+          // HEADER
           Row(
             children: [
-              Text(
-                user.username,
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-              ),
+              Text(user.username, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               const Spacer(),
-              if (widget.userId == null)
+              if (isOwnProfile)
                 IconButton(
                   icon: Icon(Icons.logout, size: 24.sp),
                   onPressed: () => _controller.onSignOutPressed(context),
@@ -103,65 +71,46 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
           VerticalSpace(10.h),
 
-          /// ===== PROFILE INFO =====
+          // PROFILE INFO
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0.h),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Story Avatar
                 Stack(
                   children: [
                     FutureBuilder(
                       future: _controller.getUserStories(uid: widget.userId),
                       builder: (context, asyncSnapshot) {
-                        if (asyncSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SizedBox();
-                        } else if (!asyncSnapshot.hasData ||
-                            asyncSnapshot.data == null) {
-                          return SizedBox();
-                        } else {
-                          final stories = asyncSnapshot.data!;
-                          return InkWell(
-                            onTap: () {
-                              if (stories.isEmpty) {
-                                return;
-                              }
-                              _controller.goToStoryViewScreen(context, stories);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: stories.isEmpty
-                                    ? null
-                                    : Border.all(
-                                        width: 3.w,
-                                        color: ColorsManager.pink,
-                                      ),
-                              ),
-                              child: CircleAvatar(
-                                radius: 45.r,
-                                backgroundImage:
-                                    (user.profileImageUrl == null ||
-                                        user.profileImageUrl!.isEmpty)
-                                    ? AssetImage(ImagesPaths.placeholder)
-                                    : NetworkImage(user.profileImageUrl!)
-                                          as ImageProvider,
-                              ),
-                            ),
-                          );
+                        if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                          return const SizedBox();
                         }
+                        final stories = asyncSnapshot.data ?? [];
+                        return InkWell(
+                          onTap: stories.isEmpty ? null : () => _controller.goToStoryViewScreen(context, stories),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: stories.isEmpty ? null : Border.all(width: 3.w, color: ColorsManager.pink),
+                            ),
+                            child: CircleAvatar(
+                              radius: 45.r,
+                              backgroundImage: (user.profileImageUrl == null || user.profileImageUrl!.isEmpty)
+                                  ? const AssetImage(ImagesPaths.placeholder)
+                                  : NetworkImage(user.profileImageUrl!) as ImageProvider,
+                            ),
+                          ),
+                        );
                       },
                     ),
-                    // show add-story button only if current user
-                    if (widget.userId == null)
+                    if (isOwnProfile)
                       Positioned(
                         bottom: -15,
                         right: -15,
                         child: IconButton(
-                          onPressed: () =>
-                              _controller.goToAddNewScreen(context),
-                          icon: Icon(Icons.add),
+                          onPressed: () => _controller.goToAddNewScreen(context),
+                          icon: const Icon(Icons.add),
                         ),
                       ),
                   ],
@@ -171,42 +120,15 @@ class _ProfileTabState extends State<ProfileTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text(user.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                       VerticalSpace(12.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          FutureBuilder(
-                            future: _controller.getUserPostsCount(
-                              uid: widget.userId,
-                            ),
-                            builder: (context, asyncSnapshot) {
-                              if (asyncSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              }
-                              return StatsInfo(
-                                number: asyncSnapshot.hasData
-                                    ? asyncSnapshot.data!.toString()
-                                    : "",
-                                label: Strings.posts,
-                              );
-                            },
-                          ),
-                          StatsInfo(
-                            number: user.followers.length.toString(),
-                            label: Strings.followers,
-                          ),
-                          StatsInfo(
-                            number: user.following.length.toString(),
-                            label: Strings.following,
-                          ),
+                          // عدد المنشورات من الـ user مباشرة
+                          StatsInfo(number: user.postsCount.toString(), label: Strings.posts),
+                          StatsInfo(number: user.followers.length.toString(), label: Strings.followers),
+                          StatsInfo(number: user.following.length.toString(), label: Strings.following),
                         ],
                       ),
                     ],
@@ -216,19 +138,15 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
           ),
           VerticalSpace(6.h),
-
-          /// ===== BIO =====
           Text(user.bio, style: TextStyle(fontSize: 14.sp)),
           VerticalSpace(8.h),
 
-          /// ===== EDIT / FOLLOW BUTTON =====
-          if (widget.userId == null)
+          // زر Follow / Edit
+          if (isOwnProfile)
             CustomButton(
-              onPressed: () {
-                // navigate to edit profile screen or whatever
-              },
+              onPressed: ()  {},//Navigator.pushNamed(context, RoutesNames.editProfile)},
               color: Colors.grey,
-              child: Text(Strings.editProfile),
+              child: const Text(Strings.editProfile),
             )
           else
             Row(
@@ -237,48 +155,31 @@ class _ProfileTabState extends State<ProfileTab> {
                   child: CustomButton(
                     onPressed: () async {
                       try {
-                        // wait for follow/unfollow to finish
-                        await _controller.handleFollowing(widget.userId!);
-
-                        // refresh local UI (color, text and provider data)
-                        await getColor();
-                        await getText();
-
-                        await Provider.of<UserProvider>(
-                          context,
-                          listen: false,
-                        ).getUserData(uid: widget.userId);
-
-                        if (mounted) setState(() {});
+                        final newState = await _controller.handleFollowing(widget.userId!);
+                        userProvider.updateFollowingState(widget.userId!, newState);
                       } catch (e) {
-                        // show error
                         if (mounted) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                         }
                       }
                     },
-                    color: color ?? Colors.grey,
-                    child: Text(text),
+                    color: buttonColor,
+                    child: Text(buttonText),
                   ),
                 ),
                 HorizontalSpace(3.w),
                 Expanded(
                   child: CustomButton(
-                    onPressed: () {
-                      // navigate to edit profile screen or whatever
-                    },
+                    onPressed: () {},
                     color: Colors.grey,
-                    child: Text(Strings.sendMessage),
+                    child: const Text(Strings.sendMessage),
                   ),
                 ),
               ],
             ),
+          const Divider(thickness: 1),
 
-          Divider(thickness: 1.h),
-
-          /// ===== POSTS GRID =====
+          // Posts Grid
           Expanded(
             child: FutureBuilder(
               future: _controller.getUserPost(userId: widget.userId),
@@ -287,9 +188,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (asyncSnapshot.hasError) {
                   return Center(child: Text('Error: ${asyncSnapshot.error}'));
-                } else if (!asyncSnapshot.hasData ||
-                    asyncSnapshot.data == null) {
-                  return const Center(child: CircularProgressIndicator());
+                } else if (!asyncSnapshot.hasData || asyncSnapshot.data!.isEmpty) {
+                  return const Center(child: Text('No posts yet'));
                 } else {
                   final data = asyncSnapshot.data!;
                   return GridView.builder(
@@ -301,10 +201,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       childAspectRatio: 4 / 5,
                     ),
                     itemBuilder: (context, index) {
-                      return Image.network(
-                        data[index].imageUrl,
-                        fit: BoxFit.fill,
-                      );
+                      return Image.network(data[index].imageUrl, fit: BoxFit.cover);
                     },
                   );
                 }
