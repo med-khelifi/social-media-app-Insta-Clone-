@@ -13,7 +13,7 @@ class StoriesSections extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110.h,
+      height: 150.h,
       child: StreamBuilder<Map<String, List<StoryModel>>>(
         stream: storiesStream,
         builder: (context, snapshot) {
@@ -46,19 +46,26 @@ class StoriesSections extends StatelessWidget {
                     arguments: userStories,
                   );
                 },
-                child: Container(
-                  height: 100.h,
-                  width: 100.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.pink, width: 3.w),
-                    image: DecorationImage(
-                      image: firstStory.imageUrl.isEmpty
-                          ? AssetImage(ImagesPaths.placeholder)
-                          : NetworkImage(firstStory.imageUrl) as ImageProvider,
-                      fit: BoxFit.cover, // تملي الدائرة بالكامل
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100.h,
+                      width: 100.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.pink, width: 3.w),
+                        image: DecorationImage(
+                          image: firstStory.imageUrl.isEmpty
+                              ? AssetImage(ImagesPaths.placeholder)
+                              : NetworkImage(firstStory.imageUrl) as ImageProvider,
+                          fit: BoxFit.cover, 
+                        ),
+                      ),
                     ),
-                  ),
+                    Text(firstStory.username)
+                  ],
                 ),
               );
             },

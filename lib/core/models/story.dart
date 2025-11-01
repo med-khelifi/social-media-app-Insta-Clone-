@@ -1,6 +1,7 @@
 class StoryModel {
   final String id;
   final String userId;
+  final String username;
   final String imageUrl;
   final String contentUrl;
   final DateTime createdAt;
@@ -9,6 +10,7 @@ class StoryModel {
 
   StoryModel({
     required this.id,
+    required this.username,
     required this.userId,
     required this.imageUrl,
     required this.contentUrl,
@@ -21,6 +23,7 @@ class StoryModel {
     return {
       'id': id,
       'userId': userId,
+      'username': username,
       'imageUrl': imageUrl,
       'contentUrl': contentUrl,
       'createdAt': createdAt.toIso8601String(),
@@ -33,6 +36,7 @@ class StoryModel {
     return StoryModel(
       id: map['id'] ?? '',
       userId: map['userId'] ?? '',
+      username: map['username'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       contentUrl: map['contentUrl'] ?? '',
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),

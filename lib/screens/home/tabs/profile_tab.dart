@@ -127,7 +127,7 @@ class _ProfileTabState extends State<ProfileTab> {
                               if (stories.isEmpty) {
                                 return;
                               }
-                              _controller.goToStoryViewScreen(context,stories);
+                              _controller.goToStoryViewScreen(context, stories);
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -231,33 +231,49 @@ class _ProfileTabState extends State<ProfileTab> {
               child: Text(Strings.editProfile),
             )
           else
-            CustomButton(
-              onPressed: () async {
-                try {
-                  // wait for follow/unfollow to finish
-                  await _controller.handleFollowing(widget.userId!);
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    onPressed: () async {
+                      try {
+                        // wait for follow/unfollow to finish
+                        await _controller.handleFollowing(widget.userId!);
 
-                  // refresh local UI (color, text and provider data)
-                  await getColor();
-                  await getText();
+                        // refresh local UI (color, text and provider data)
+                        await getColor();
+                        await getText();
 
-                  await Provider.of<UserProvider>(
-                    context,
-                    listen: false,
-                  ).getUserData(uid: widget.userId);
+                        await Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        ).getUserData(uid: widget.userId);
 
-                  if (mounted) setState(() {});
-                } catch (e) {
-                  // show error
-                  if (mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                  }
-                }
-              },
-              color: color ?? Colors.grey,
-              child: Text(text),
+                        if (mounted) setState(() {});
+                      } catch (e) {
+                        // show error
+                        if (mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                        }
+                      }
+                    },
+                    color: color ?? Colors.grey,
+                    child: Text(text),
+                  ),
+                ),
+                HorizontalSpace(3.w),
+                Expanded(
+                  child: CustomButton(
+                    onPressed: () {
+                      // navigate to edit profile screen or whatever
+                    },
+                    color: Colors.grey,
+                    child: Text(Strings.sendMessage),
+                  ),
+                ),
+              ],
             ),
 
           Divider(thickness: 1.h),

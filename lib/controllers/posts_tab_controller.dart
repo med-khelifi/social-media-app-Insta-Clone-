@@ -85,4 +85,8 @@ class PostsTabController {
       ),
     );
   }
+
+  void goToMessageScreen(BuildContext context) {
+    Navigator.pushNamed(context, RoutesNames.chats);
+  }
 }

@@ -4,7 +4,7 @@ import 'package:insta/controllers/posts_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 import 'package:insta/screens/home/widgets/post_tab_header.dart';
 import 'package:insta/screens/home/widgets/post_widget.dart';
-import 'package:insta/screens/home/widgets/stories_seaction.dart';
+import 'package:insta/screens/home/widgets/stories_section.dart';
 
 class PostsTab extends StatefulWidget {
   const PostsTab({super.key});
@@ -26,7 +26,9 @@ class _PostsTabState extends State<PostsTab> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          PostTabHeader(),
+          PostTabHeader(
+            onMessageIconPressed: () => _controller.goToMessageScreen(context),
+          ),
           StoriesSections(
             storiesStream: _controller
                 .getStoriesForCurrentUserAndFollowingsStream(),

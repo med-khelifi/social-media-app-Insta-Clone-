@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
 
 class PostTabHeader extends StatelessWidget {
-  const PostTabHeader({super.key});
+  const PostTabHeader({super.key, required this.onMessageIconPressed});
+  final VoidCallback onMessageIconPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class PostTabHeader extends StatelessWidget {
           const Spacer(),
           const Icon(Icons.favorite_border),
           HorizontalSpace(6.w),
-          const Icon(Icons.send),
+          IconButton(onPressed: onMessageIconPressed, icon: Icon(Icons.send)),
         ],
       ),
     );

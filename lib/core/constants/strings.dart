@@ -35,4 +35,6 @@ class Strings {
   static const String cancel = 'Cancel';
 
   static const String postDeleted = "Post deleted";
+
+  static String sendMessage = "message";
 }

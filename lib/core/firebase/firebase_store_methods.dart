@@ -188,6 +188,8 @@ class FirebaseStoreMethods {
     required bool isImage,
     required String fileUrl,
     required String imageUrl,
+    required String username,
+    
   }) async {
     final story = StoryModel(
       id: Uuid().v4(),
@@ -196,6 +198,7 @@ class FirebaseStoreMethods {
       createdAt: DateTime.now(),
       isVideo: !isImage,
       contentUrl: fileUrl,
+      username: username,
     );
 
     await FirebaseFirestore.instance
@@ -204,64 +207,70 @@ class FirebaseStoreMethods {
         .set(story.toMap());
   }
 
-  Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() async* {
-  final String currentUserId = FirebaseAuthSettings.currentUserId;
+  Stream<Map<String, List<StoryModel>>>
+  getStoriesForCurrentUserAndFollowingsStream() async* {
+    final String currentUserId = FirebaseAuthSettings.currentUserId;
 
-  final userDoc = await FirebaseFirestore.instance
-      .collection(FirebaseSettings.usersCollection)
-      .doc(currentUserId)
-      .get();
+    final userDoc = await FirebaseFirestore.instance
+        .collection(FirebaseSettings.usersCollection)
+        .doc(currentUserId)
+        .get();
 
-  List<String> followings = List<String>.from(
-    userDoc.data()?['following'] ?? [],
-  );
-  followings.add(currentUserId);
+    List<String> followings = List<String>.from(
+      userDoc.data()?['following'] ?? [],
+    );
+    followings.add(currentUserId);
 
-  // 🔹 تقسيم المتابعين إلى مجموعات من 10 IDs
-  List<List<String>> chunks = [];
-  for (var i = 0; i < followings.length; i += 10) {
-    chunks.add(followings.sublist(
-      i,
-      i + 10 > followings.length ? followings.length : i + 10,
-    ));
+    // 🔹 تقسيم المتابعين إلى مجموعات من 10 IDs
+    List<List<String>> chunks = [];
+    for (var i = 0; i < followings.length; i += 10) {
+      chunks.add(
+        followings.sublist(
+          i,
+          i + 10 > followings.length ? followings.length : i + 10,
+        ),
+      );
+    }
+
+    // 🔹 لكل مجموعة نعمل Stream
+    List<Stream<QuerySnapshot<Map<String, dynamic>>>> streams = chunks
+        .map(
+          (chunk) => FirebaseFirestore.instance
+              .collection(FirebaseSettings.storiesCollection)
+              .where('userId', whereIn: chunk)
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+        )
+        .toList();
+
+    // 🔹 دمج كل Streams في Stream واحد
+    yield* StreamGroup.merge(streams).asyncMap((snapshot) async {
+      final stories = snapshot.docs
+          .map((doc) => StoryModel.fromMap(doc.data()))
+          .toList();
+
+      Map<String, List<StoryModel>> result = {};
+      for (var story in stories) {
+        result[story.userId] ??= [];
+        result[story.userId]!.add(story);
+      }
+
+      // ترتيب بحيث تكون قصص المستخدم الحالي في البداية
+      final sortedKeys = result.keys.toList()
+        ..sort((a, b) {
+          if (a == currentUserId) return -1;
+          if (b == currentUserId) return 1;
+          return 0;
+        });
+
+      Map<String, List<StoryModel>> sortedResult = {};
+      for (var key in sortedKeys) {
+        sortedResult[key] = result[key]!;
+      }
+
+      return sortedResult;
+    });
   }
-
-  // 🔹 لكل مجموعة نعمل Stream
-  List<Stream<QuerySnapshot<Map<String, dynamic>>>> streams = chunks
-      .map((chunk) => FirebaseFirestore.instance
-          .collection(FirebaseSettings.storiesCollection)
-          .where('userId', whereIn: chunk)
-          .orderBy('createdAt', descending: true)
-          .snapshots())
-      .toList();
-
-  // 🔹 دمج كل Streams في Stream واحد
-  yield* StreamGroup.merge(streams).asyncMap((snapshot) async {
-    final stories = snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
-
-    Map<String, List<StoryModel>> result = {};
-    for (var story in stories) {
-      result[story.userId] ??= [];
-      result[story.userId]!.add(story);
-    }
-
-    // ترتيب بحيث تكون قصص المستخدم الحالي في البداية
-    final sortedKeys = result.keys.toList()
-      ..sort((a, b) {
-        if (a == currentUserId) return -1;
-        if (b == currentUserId) return 1;
-        return 0;
-      });
-
-    Map<String, List<StoryModel>> sortedResult = {};
-    for (var key in sortedKeys) {
-      sortedResult[key] = result[key]!;
-    }
-
-    return sortedResult;
-  });
-}
-
 
   /// Delete stories older than 24 hours
   Future<void> deleteExpiredStories() async {

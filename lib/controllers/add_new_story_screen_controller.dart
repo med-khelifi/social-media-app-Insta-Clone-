@@ -116,6 +116,7 @@ class AddNewStoryScreenController {
       isImage: isImage ?? true,
       fileUrl: fileUrl,
       imageUrl: user.profileImageUrl ?? '',
+      username: user.username,
     );
     // ignore: use_build_context_synchronously
     Util.showSnackBar("Uploaded", context: context);
