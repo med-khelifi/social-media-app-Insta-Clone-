@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:insta/core/constants/colors.dart';
 import 'package:insta/core/constants/routes.dart';
 import 'package:insta/core/constants/strings.dart';
+import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_store_methods.dart';
 import 'package:insta/core/models/post.dart';
+import 'package:insta/core/models/story.dart';
 
 class ProfileTabController {
   late FirebaseStoreMethods _firebaseStoreMethods;
@@ -38,11 +40,13 @@ class ProfileTabController {
     if (res == true) {
       try {
         await FirebaseAuth.instance.signOut();
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, RoutesNames.login);
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error signing out: $error')),
-        );
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error signing out: $error')));
       }
     }
   }
@@ -63,7 +67,6 @@ class ProfileTabController {
     return await _firebaseStoreMethods.isFollowing(userId);
   }
 
-  /// <- الآن ترجع Future<bool> (true => now following, false => now not following)
   Future<bool> handleFollowing(String userId) async {
     try {
       final currentlyFollowing = await _isFollowing(userId);
@@ -75,7 +78,6 @@ class ProfileTabController {
         return true;
       }
     } catch (e) {
-      // يمكنك هنا تسجيل الخطأ أو إعادة رميه حسب الحاجة
       rethrow;
     }
   }
@@ -104,5 +106,14 @@ class ProfileTabController {
 
   void goToAddNewScreen(BuildContext context) {
     Navigator.pushNamed(context, RoutesNames.addNewStory);
+  }
+
+  Future<List<StoryModel>> getUserStories({String? uid}) async =>
+      _firebaseStoreMethods.getUserStories(
+        uid ?? FirebaseAuthSettings.currentUserId,
+      );
+
+  void goToStoryViewScreen(BuildContext context, List<StoryModel> stories) {
+    Navigator.pushNamed(context, RoutesNames.storyView,arguments: stories);
   }
 }

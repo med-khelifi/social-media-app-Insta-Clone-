@@ -77,6 +77,11 @@ class _PostsTabState extends State<PostsTab> {
                           asyncSnapshot.data![index].userId,
                           asyncSnapshot.data![index].imageUrl,
                         ),
+                        onProfileIconPressed: () =>
+                            _controller.onProfileIconPressed(
+                              context,
+                              asyncSnapshot.data![index].userId,
+                            ),
                       ),
                     );
                   },

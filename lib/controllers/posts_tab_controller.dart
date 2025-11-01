@@ -9,6 +9,7 @@ import 'package:insta/core/models/post.dart';
 import 'package:insta/core/models/story.dart';
 import 'package:insta/core/supabase/supabase_storage_service.dart';
 import 'package:insta/core/util/util.dart';
+import 'package:insta/screens/home/tabs/profile_tab.dart';
 
 class PostsTabController {
   late FirebaseStoreMethods _firebaseStoreMethods;
@@ -69,7 +70,19 @@ class PostsTabController {
     }
   }
 
-  Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() {
+  Stream<Map<String, List<StoryModel>>>
+  getStoriesForCurrentUserAndFollowingsStream() {
     return _firebaseStoreMethods.getStoriesForCurrentUserAndFollowingsStream();
+  }
+
+  void onProfileIconPressed(BuildContext context, String userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          body: SafeArea(child: ProfileTab(userId: userId)),
+        ),
+      ),
+    );
   }
 }

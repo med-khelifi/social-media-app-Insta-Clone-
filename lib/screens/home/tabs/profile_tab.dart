@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:insta/core/constants/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:insta/controllers/profile_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
@@ -110,13 +111,47 @@ class _ProfileTabState extends State<ProfileTab> {
               children: [
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 45.r,
-                      backgroundImage:
-                          (user.profileImageUrl == null ||
-                              user.profileImageUrl!.isEmpty)
-                              ? AssetImage(ImagesPaths.placeholder)
-                              : NetworkImage(user.profileImageUrl!) as ImageProvider,
+                    FutureBuilder(
+                      future: _controller.getUserStories(uid: widget.userId),
+                      builder: (context, asyncSnapshot) {
+                        if (asyncSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox();
+                        } else if (!asyncSnapshot.hasData ||
+                            asyncSnapshot.data == null) {
+                          return SizedBox();
+                        } else {
+                          final stories = asyncSnapshot.data!;
+                          return InkWell(
+                            onTap: () {
+                              if (stories.isEmpty) {
+                                return;
+                              }
+                              _controller.goToStoryViewScreen(context,stories);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: stories.isEmpty
+                                    ? null
+                                    : Border.all(
+                                        width: 3.w,
+                                        color: ColorsManager.pink,
+                                      ),
+                              ),
+                              child: CircleAvatar(
+                                radius: 45.r,
+                                backgroundImage:
+                                    (user.profileImageUrl == null ||
+                                        user.profileImageUrl!.isEmpty)
+                                    ? AssetImage(ImagesPaths.placeholder)
+                                    : NetworkImage(user.profileImageUrl!)
+                                          as ImageProvider,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
                     // show add-story button only if current user
                     if (widget.userId == null)
@@ -124,7 +159,8 @@ class _ProfileTabState extends State<ProfileTab> {
                         bottom: -15,
                         right: -15,
                         child: IconButton(
-                          onPressed: () => _controller.goToAddNewScreen(context),
+                          onPressed: () =>
+                              _controller.goToAddNewScreen(context),
                           icon: Icon(Icons.add),
                         ),
                       ),
@@ -214,8 +250,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 } catch (e) {
                   // show error
                   if (mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('Error: $e')));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   }
                 }
               },

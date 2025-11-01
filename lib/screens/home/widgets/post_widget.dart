@@ -12,11 +12,12 @@ class PostWidget extends StatelessWidget {
     required this.onLikeIconPressed,
     required this.likeIconColor,
     required this.showDeleteIcon,
-    required this.deletePostPressed,
+    required this.deletePostPressed, required this.onProfileIconPressed,
   });
   final VoidCallback onCommentIconPressed;
   final VoidCallback onLikeIconPressed;
   final VoidCallback deletePostPressed;
+  final VoidCallback onProfileIconPressed;
   final PostModel post;
   final Color likeIconColor;
   final bool showDeleteIcon;
@@ -30,11 +31,14 @@ class PostWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundImage:
-                    post.userImage == null || post.userImage!.isEmpty
-                    ? AssetImage(ImagesPaths.placeholder)
-                    : NetworkImage(post.userImage!),
+              InkWell(
+                onTap: onProfileIconPressed,
+                child: CircleAvatar(
+                  backgroundImage:
+                      post.userImage == null || post.userImage!.isEmpty
+                      ? AssetImage(ImagesPaths.placeholder)
+                      : NetworkImage(post.userImage!),
+                ),
               ),
               HorizontalSpace(8.w),
               Text(post.username),
