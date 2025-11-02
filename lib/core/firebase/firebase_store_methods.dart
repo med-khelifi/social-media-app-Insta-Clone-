@@ -2,6 +2,8 @@ import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta/core/firebase/firebase_auth_settings.dart';
 import 'package:insta/core/firebase/firebase_settings.dart';
+import 'package:insta/core/models/Message.dart';
+import 'package:insta/core/models/chat.dart';
 import 'package:insta/core/models/comment.dart';
 import 'package:insta/core/models/post.dart';
 import 'package:insta/core/models/story.dart';
@@ -9,7 +11,6 @@ import 'package:insta/core/models/user.dart';
 import 'package:uuid/uuid.dart';
 
 class FirebaseStoreMethods {
-
   Future<UserModel> getCurrentUserData({String? uid}) async {
     final currentUserId = FirebaseAuthSettings.currentUserId;
     final targetUserId = uid ?? currentUserId;
@@ -44,7 +45,9 @@ class FirebaseStoreMethods {
           .doc(currentUserId)
           .get();
 
-      final followingList = List<String>.from(currentUserDoc['following'] ?? []);
+      final followingList = List<String>.from(
+        currentUserDoc['following'] ?? [],
+      );
       final isFollowing = followingList.contains(targetUserId);
 
       user = user.copyWith(isFollowing: isFollowing);
@@ -173,15 +176,17 @@ class FirebaseStoreMethods {
         .collection(FirebaseSettings.usersCollection)
         .doc(uid)
         .update({
-      'followers': FieldValue.arrayUnion([FirebaseAuthSettings.currentUserId]),
-    });
+          'followers': FieldValue.arrayUnion([
+            FirebaseAuthSettings.currentUserId,
+          ]),
+        });
 
     await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
         .doc(FirebaseAuthSettings.currentUserId)
         .update({
-      'following': FieldValue.arrayUnion([uid]),
-    });
+          'following': FieldValue.arrayUnion([uid]),
+        });
   }
 
   Future<void> unfollowUser(String uid) async {
@@ -189,15 +194,17 @@ class FirebaseStoreMethods {
         .collection(FirebaseSettings.usersCollection)
         .doc(uid)
         .update({
-      'followers': FieldValue.arrayRemove([FirebaseAuthSettings.currentUserId]),
-    });
+          'followers': FieldValue.arrayRemove([
+            FirebaseAuthSettings.currentUserId,
+          ]),
+        });
 
     await FirebaseFirestore.instance
         .collection(FirebaseSettings.usersCollection)
         .doc(FirebaseAuthSettings.currentUserId)
         .update({
-      'following': FieldValue.arrayRemove([uid]),
-    });
+          'following': FieldValue.arrayRemove([uid]),
+        });
   }
 
   // يمكن الاحتفاظ بها للاستخدامات الأخرى
@@ -207,7 +214,8 @@ class FirebaseStoreMethods {
         .doc(FirebaseAuthSettings.currentUserId)
         .get();
 
-    List following = (userDoc.data() as Map<String, dynamic>)['following'] ?? [];
+    List following =
+        (userDoc.data() as Map<String, dynamic>)['following'] ?? [];
     return following.contains(uid);
   }
 
@@ -233,7 +241,8 @@ class FirebaseStoreMethods {
         .set(story.toMap());
   }
 
-  Stream<Map<String, List<StoryModel>>> getStoriesForCurrentUserAndFollowingsStream() async* {
+  Stream<Map<String, List<StoryModel>>>
+  getStoriesForCurrentUserAndFollowingsStream() async* {
     final String currentUserId = FirebaseAuthSettings.currentUserId;
 
     final userDoc = await FirebaseFirestore.instance
@@ -241,12 +250,19 @@ class FirebaseStoreMethods {
         .doc(currentUserId)
         .get();
 
-    List<String> followings = List<String>.from(userDoc.data()?['following'] ?? []);
+    List<String> followings = List<String>.from(
+      userDoc.data()?['following'] ?? [],
+    );
     followings.add(currentUserId);
 
     List<List<String>> chunks = [];
     for (var i = 0; i < followings.length; i += 10) {
-      chunks.add(followings.sublist(i, i + 10 > followings.length ? followings.length : i + 10));
+      chunks.add(
+        followings.sublist(
+          i,
+          i + 10 > followings.length ? followings.length : i + 10,
+        ),
+      );
     }
 
     List<Stream<QuerySnapshot<Map<String, dynamic>>>> streams = chunks
@@ -260,7 +276,9 @@ class FirebaseStoreMethods {
         .toList();
 
     yield* StreamGroup.merge(streams).asyncMap((snapshot) async {
-      final stories = snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
+      final stories = snapshot.docs
+          .map((doc) => StoryModel.fromMap(doc.data()))
+          .toList();
 
       Map<String, List<StoryModel>> result = {};
       for (var story in stories) {
@@ -306,15 +324,144 @@ class FirebaseStoreMethods {
 
   Future<List<StoryModel>> getUserStories(String uid) async {
     try {
-      final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-          .collection(FirebaseSettings.storiesCollection)
-          .where('userId', isEqualTo: uid)
-          .orderBy('createdAt', descending: true)
-          .get();
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance
+              .collection(FirebaseSettings.storiesCollection)
+              .where('userId', isEqualTo: uid)
+              .orderBy('createdAt', descending: true)
+              .get();
 
-      return snapshot.docs.map((doc) => StoryModel.fromMap(doc.data())).toList();
+      return snapshot.docs
+          .map((doc) => StoryModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       return [];
     }
+  }
+
+  /// Messages functions
+  /// ✅ 1. Check if a chat exists between two users or create a new one
+  Future<String> checkOrCreateChat(String receiverId) async {
+    final currentUserId = FirebaseAuthSettings.currentUserId;
+
+    // 🔍 check existing chat
+    final chatQuery = await FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .where('participants', arrayContains: currentUserId)
+        .get();
+
+    for (final doc in chatQuery.docs) {
+      final data = doc.data();
+      final participants = List<String>.from(data['participants']);
+      if (participants.contains(receiverId)) {
+        return doc.id; // existing chat found
+      }
+    }
+
+    // 🆕 create new chat
+    final chatId = const Uuid().v4();
+    final newChat = ChatModel(
+      chatId: chatId,
+      participants: [currentUserId, receiverId],
+      lastMessage: '',
+      updatedAt: DateTime.now(),
+    );
+
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .doc(chatId)
+        .set(newChat.toMap());
+
+    return chatId;
+  }
+
+  /// ✅ 2. Send a message inside a chat
+  Future<void> sendMessage({
+    required String chatId,
+    required String receiverId,
+    required String text,
+    String? imageUrl,
+  }) async {
+    final currentUserId = FirebaseAuthSettings.currentUserId;
+    final messageId = const Uuid().v4();
+
+    final message = MessageModel(
+      id: messageId,
+      senderId: currentUserId,
+      receiverId: receiverId,
+      text: text,
+      imageUrl: imageUrl,
+      sentAt: DateTime.now(),
+      isSeen: false,
+    );
+
+    // 📨 Add message
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .doc(chatId)
+        .collection(FirebaseSettings.messagesCollection)
+        .doc(messageId)
+        .set(message.toMap());
+
+    // 🔄 Update chat info
+    await FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .doc(chatId)
+        .update({
+          'lastMessage': text,
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
+        });
+  }
+
+  /// ✅ 3. Retrieve current user's chats
+  Stream<List<Map<String, dynamic>>> getCurrentUserChats() {
+    final currentUserId = FirebaseAuthSettings.currentUserId;
+
+    return FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .where('participants', arrayContains: currentUserId)
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+          List<Map<String, dynamic>> chatData = [];
+
+          for (var doc in snapshot.docs) {
+            final chat = ChatModel.fromMap(doc.data());
+            final otherId = chat.participants.firstWhere(
+              (id) => id != currentUserId,
+            );
+
+            // Fetch other user info from Firestore
+            final userDoc = await FirebaseFirestore.instance
+                .collection(FirebaseSettings.usersCollection)
+                .doc(otherId)
+                .get();
+            final userData = userDoc.data();
+
+            chatData.add({
+              'chat': chat,
+              'receiverId': otherId,
+              'receiverName': userData?['name'] ?? 'Unknown',
+              'receiverImage': userData?['image'] ?? '',
+            });
+          }
+
+          return chatData;
+        });
+  }
+
+  /// ✅ 4. Retrieve messages in a chat
+  Stream<List<MessageModel>> getChatMessages(String chatId) {
+    return FirebaseFirestore.instance
+        .collection(FirebaseSettings.chatsCollection)
+        .doc(chatId)
+        .collection(FirebaseSettings.messagesCollection)
+        .orderBy('sentAt', descending: false)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => MessageModel.fromMap(doc.data()))
+              .toList(),
+        );
   }
 }

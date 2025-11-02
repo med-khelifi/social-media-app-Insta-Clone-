@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:insta/core/constants/colors.dart';
+import 'package:insta/core/constants/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:insta/controllers/profile_tab_controller.dart';
 import 'package:insta/core/constants/constants_widgets.dart';
@@ -29,8 +30,10 @@ class _ProfileTabState extends State<ProfileTab> {
     _controller = ProfileTabController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<UserProvider>(context, listen: false)
-          .getUserData(uid: widget.userId);
+      await Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).getUserData(uid: widget.userId);
     });
   }
 
@@ -60,7 +63,10 @@ class _ProfileTabState extends State<ProfileTab> {
           // HEADER
           Row(
             children: [
-              Text(user.username, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              Text(
+                user.username,
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+              ),
               const Spacer(),
               if (isOwnProfile)
                 IconButton(
@@ -83,22 +89,36 @@ class _ProfileTabState extends State<ProfileTab> {
                     FutureBuilder(
                       future: _controller.getUserStories(uid: widget.userId),
                       builder: (context, asyncSnapshot) {
-                        if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                        if (asyncSnapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const SizedBox();
                         }
                         final stories = asyncSnapshot.data ?? [];
                         return InkWell(
-                          onTap: stories.isEmpty ? null : () => _controller.goToStoryViewScreen(context, stories),
+                          onTap: stories.isEmpty
+                              ? null
+                              : () => _controller.goToStoryViewScreen(
+                                  context,
+                                  stories,
+                                ),
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: stories.isEmpty ? null : Border.all(width: 3.w, color: ColorsManager.pink),
+                              border: stories.isEmpty
+                                  ? null
+                                  : Border.all(
+                                      width: 3.w,
+                                      color: ColorsManager.pink,
+                                    ),
                             ),
                             child: CircleAvatar(
                               radius: 45.r,
-                              backgroundImage: (user.profileImageUrl == null || user.profileImageUrl!.isEmpty)
+                              backgroundImage:
+                                  (user.profileImageUrl == null ||
+                                      user.profileImageUrl!.isEmpty)
                                   ? const AssetImage(ImagesPaths.placeholder)
-                                  : NetworkImage(user.profileImageUrl!) as ImageProvider,
+                                  : NetworkImage(user.profileImageUrl!)
+                                        as ImageProvider,
                             ),
                           ),
                         );
@@ -109,7 +129,8 @@ class _ProfileTabState extends State<ProfileTab> {
                         bottom: -15,
                         right: -15,
                         child: IconButton(
-                          onPressed: () => _controller.goToAddNewScreen(context),
+                          onPressed: () =>
+                              _controller.goToAddNewScreen(context),
                           icon: const Icon(Icons.add),
                         ),
                       ),
@@ -120,15 +141,30 @@ class _ProfileTabState extends State<ProfileTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(user.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                      Text(
+                        user.name,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       VerticalSpace(12.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           // عدد المنشورات من الـ user مباشرة
-                          StatsInfo(number: user.postsCount.toString(), label: Strings.posts),
-                          StatsInfo(number: user.followers.length.toString(), label: Strings.followers),
-                          StatsInfo(number: user.following.length.toString(), label: Strings.following),
+                          StatsInfo(
+                            number: user.postsCount.toString(),
+                            label: Strings.posts,
+                          ),
+                          StatsInfo(
+                            number: user.followers.length.toString(),
+                            label: Strings.followers,
+                          ),
+                          StatsInfo(
+                            number: user.following.length.toString(),
+                            label: Strings.following,
+                          ),
                         ],
                       ),
                     ],
@@ -144,7 +180,8 @@ class _ProfileTabState extends State<ProfileTab> {
           // زر Follow / Edit
           if (isOwnProfile)
             CustomButton(
-              onPressed: ()  {},//Navigator.pushNamed(context, RoutesNames.editProfile)},
+              onPressed:
+                  () {}, //Navigator.pushNamed(context, RoutesNames.editProfile)},
               color: Colors.grey,
               child: const Text(Strings.editProfile),
             )
@@ -155,11 +192,18 @@ class _ProfileTabState extends State<ProfileTab> {
                   child: CustomButton(
                     onPressed: () async {
                       try {
-                        final newState = await _controller.handleFollowing(widget.userId!);
-                        userProvider.updateFollowingState(widget.userId!, newState);
+                        final newState = await _controller.handleFollowing(
+                          widget.userId!,
+                        );
+                        userProvider.updateFollowingState(
+                          widget.userId!,
+                          newState,
+                        );
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
                         }
                       }
                     },
@@ -170,7 +214,17 @@ class _ProfileTabState extends State<ProfileTab> {
                 HorizontalSpace(3.w),
                 Expanded(
                   child: CustomButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        RoutesNames.messages,
+                        arguments: {
+                          'receiverId': user.uid,
+                          'receiverName': user.name,
+                          'receiverImage': user.profileImageUrl,
+                        },
+                      );
+                    },
                     color: Colors.grey,
                     child: const Text(Strings.sendMessage),
                   ),
@@ -188,7 +242,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (asyncSnapshot.hasError) {
                   return Center(child: Text('Error: ${asyncSnapshot.error}'));
-                } else if (!asyncSnapshot.hasData || asyncSnapshot.data!.isEmpty) {
+                } else if (!asyncSnapshot.hasData ||
+                    asyncSnapshot.data!.isEmpty) {
                   return const Center(child: Text('No posts yet'));
                 } else {
                   final data = asyncSnapshot.data!;
@@ -201,7 +256,10 @@ class _ProfileTabState extends State<ProfileTab> {
                       childAspectRatio: 4 / 5,
                     ),
                     itemBuilder: (context, index) {
-                      return Image.network(data[index].imageUrl, fit: BoxFit.cover);
+                      return Image.network(
+                        data[index].imageUrl,
+                        fit: BoxFit.cover,
+                      );
                     },
                   );
                 }

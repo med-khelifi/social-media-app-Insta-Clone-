@@ -6,7 +6,7 @@ import 'package:insta/screens/home/home_screen.dart';
 import 'package:insta/screens/login_screen.dart';
 import 'package:insta/screens/signup_screen.dart';
 import 'package:insta/screens/story_view_screen.dart';
-import 'package:insta/screens/widgets/message_screen.dart';
+import 'package:insta/screens/message_screen.dart';
 
 class Routes {
   static Map<String, WidgetBuilder> routes = {
@@ -17,11 +17,10 @@ class Routes {
     RoutesNames.addNewStory: (context) => AddStoryScreen(),
     RoutesNames.storyView: (context) => StoryViewScreen(),
     RoutesNames.chats: (context) => ChatsListScreen(),
-    RoutesNames.messages: (context) => ChatScreen(), // receiverId: '',, receiverName: '',, receiverImage: '',
+    RoutesNames.messages: (context) =>
+        MessagesScreen(), // receiverId: '',, receiverName: '',, receiverImage: '',
   };
 }
-
-
 
 class RoutesNames {
   static const String login = '/login';
